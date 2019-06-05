@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="tran">#00000000</color>
+    <color name="white">#fff</color>
+    <color name="white_tran">#88ffffff</color>
+    <color name="color_nor">#656b77</color>
+    <color name="fafbfc">#fafbfc</color>
+
+
+
+
+    <color name="device_name">#0060ff</color>
+    <color name="tab_normal">#868686</color>
+    <color name="tab_selected">#0060ff</color>
+    <color name="btcolor1">#6f7b8c</color>
+    <color name="btcolor2">#5a5d62</color>
+    <color name="btcolor3">#e9eff2</color>
+    <color name="btcolor4">#fff</color>
+    <color name="btcolor5">#222</color>
+    <color name="btcolor6">#656b77</color>
+    <color name="btcolor7">#000</color>
+    <color name="btcolor8">#6f7b8c</color>
+    <color name="btcolor9">#6f7b8c</color>
+    <color name="btcolor10">#fff</color>
+    <color name="btcolor11">#868686</color>
+    <color name="btcolor12">#222</color>
+    <color name="btcolor13">#919191</color>
+    <color name="btcolor14">#919191</color>
+    <color name="btcolor15">#000</color>
+    <color name="btcolor16">#222</color>
+    <color name="btcolor17">#222</color>
+</resources>

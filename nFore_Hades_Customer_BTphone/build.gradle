@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        applicationId "com.nforetek.bt.phone"
+        minSdkVersion 21
+        targetSdkVersion 28
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+repositories{
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation files('libs/fastjson-1.2.2.jar')
+    implementation files('libs/pinyin4j-2.5.0.jar')
+    implementation files('libs/appbase.jar')
+    implementation files('libs/nforebtbase.jar')
+    implementation files('libs/sourcemng-proxy.jar')
+    implementation files('libs/service-proxy.jar')
+    implementation files('libs/systemservice-proxy.jar')
+    implementation files('libs/adayosource-proxy.jar')
+    implementation files('libs/sharedata-proxy.jar')
+//    implementation files('libs/nForeAPI.jar')
+    implementation files('libs/navi-proxy.jar')
+    implementation(name: 'NaviCommonUi', ext: 'aar')
+}

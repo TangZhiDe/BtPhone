@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">nFore</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <!-- service package -->
+    <string name="str_sev_package">com.nforetek.bt.customer.service</string>
+    <!-- service action -->
+    <string name="str_sev_action">com.nforetek.bt.CUSTOMER_SERVICE</string>
+    <string name="string1">请在连接设备后使用</string>
+    <string name="string2">连接设备</string>
+    <string name="string3">通话记录</string>
+    <string name="string4">通讯录</string>
+    <string name="string16">无联系人，</string>
+    <string name="string5">请先同步通讯录</string>
+    <string name="string6">正在同步通讯录…</string>
+    <string name="string7">同步</string>
+    <string name="string8">确认断开</string>
+    <string name="string9">您仍可以进入设置功能连接设备。</string>
+    <string name="string10">断开连接</string>
+    <string name="string11">取消</string>
+    <string name="string12">来电…</string>
+    <string name="string13">呼出…</string>
+    <string name="string14">挂断…</string>
+    <string name="string15">拨号…</string>
+    <string name="string17">来电</string>
+    <string name="string18">拨号</string>
+</resources>

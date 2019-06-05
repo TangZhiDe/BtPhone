@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="btcolor1">#5a5d62</color>
+    <color name="btcolor10">#1d2533</color>
+    <color name="btcolor11">#868686</color>
+    <color name="btcolor12">#6f7b8c</color>
+    <color name="btcolor13">#919191</color>
+    <color name="btcolor14">#868686</color>
+    <color name="btcolor15">#939dae</color>
+    <color name="btcolor16">#fff</color>
+    <color name="btcolor17">#939dae</color>
+    <color name="btcolor2">#fff</color>
+    <color name="btcolor3">#656b77</color>
+    <color name="btcolor4">#121924</color>
+    <color name="btcolor5">#939dae</color>
+    <color name="btcolor6">#656b77</color>
+    <color name="btcolor7">#9da7b5</color>
+    <color name="btcolor8">#868686</color>
+    <color name="btcolor9">#fff</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="color_nor">#6f7b8c</color>
+    <color name="device_name">#0060ff</color>
+    <color name="fafbfc">#121924</color>
+    <color name="tab_normal">#868686</color>
+    <color name="tab_selected">#0060ff</color>
+    <color name="text_color">@android:color/white</color>
+    <color name="tran">#00000000</color>
+    <color name="white">#fff</color>
+    <color name="white_tran">#88ffffff</color>
+    <style name="Theme.AppCompat.DayNight" parent="Theme.AppCompat"/>
+    <style name="Theme.AppCompat.DayNight.DarkActionBar" parent="Theme.AppCompat"/>
+    <style name="Theme.AppCompat.DayNight.Dialog" parent="Theme.AppCompat.Dialog"/>
+    <style name="Theme.AppCompat.DayNight.Dialog.Alert" parent="Theme.AppCompat.Dialog.Alert"/>
+    <style name="Theme.AppCompat.DayNight.Dialog.MinWidth" parent="Theme.AppCompat.Dialog.MinWidth"/>
+    <style name="Theme.AppCompat.DayNight.DialogWhenLarge" parent="Theme.AppCompat.DialogWhenLarge"/>
+    <style name="Theme.AppCompat.DayNight.NoActionBar" parent="Theme.AppCompat.NoActionBar"/>
+</resources>
