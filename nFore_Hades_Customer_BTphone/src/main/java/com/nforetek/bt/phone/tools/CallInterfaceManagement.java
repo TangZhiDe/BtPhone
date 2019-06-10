@@ -15,6 +15,7 @@ import com.nforetek.bt.phone.IncomingActivity;
 import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.R;
 import com.nforetek.bt.phone.presenter.BtPresenter;
+import com.nforetek.bt.phone.service_boardcast.CallService;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class CallInterfaceManagement {
     public final static int SHOW_TYPE_DIALOG = 1;//显示弹窗
     public final static int SHOW_TYPE_Activity = 2;//显示Activity
     public final static int SHOW_TYPE_OUT = 3;//去电
+    public final static int SHOW_TYPE_YUAN = 4;//显示弹窗
     private static CallInterfaceManagement mModel;
     private Context context;
 
@@ -54,6 +56,10 @@ public class CallInterfaceManagement {
     }
 
     public void showCallInterface(Context context,int type){
+        if(CallService.backCarState){
+            Log.d(TAG, "showCallInterface: 正在倒车，不显示通话界面");
+            return;
+        }
         boolean isBtAtTop = getTopAppPackageName(context);
         switch (type){
             case SHOW_TYPE_IN:
@@ -73,13 +79,23 @@ public class CallInterfaceManagement {
                 break;
             case SHOW_TYPE_OUT:
                 if(isBtAtTop){
-                    if (MyApplication.callingActivity == null) {
-                        Log.d(TAG, "------------显示Activity-----去电----------");
-                        Intent intent = new Intent();
-                        intent.setClass(context, CallingActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
+                    List<NfHfpClientCall> hfpCallList = null;
+                    try {
+                        hfpCallList = btPresenter.getHfpCallList();
+                        if(hfpCallList != null && hfpCallList.size()>0){
+                            if (MyApplication.callingActivity == null) {
+                                Log.d(TAG, "------------显示Activity-----去电----------");
+                                Intent intent = new Intent();
+                                intent.setClass(context, CallingActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(intent);
+                            }
+                        }
+
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
+
                 }else {
                     Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
                     myHandler.sendEmptyMessage(0);
@@ -87,6 +103,9 @@ public class CallInterfaceManagement {
                 break;
             case SHOW_TYPE_DIALOG:
                 ((Activity)context).moveTaskToBack(true);
+                myHandler.sendEmptyMessage(0);
+                break;
+            case SHOW_TYPE_YUAN:
                 myHandler.sendEmptyMessage(0);
                 break;
             case SHOW_TYPE_Activity:

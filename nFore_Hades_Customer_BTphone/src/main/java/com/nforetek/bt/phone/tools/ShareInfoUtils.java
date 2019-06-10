@@ -1,6 +1,7 @@
 package com.nforetek.bt.phone.tools;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.adayo.app.utils.LogUtils;
@@ -11,13 +12,16 @@ import com.nforetek.bt.phone.service_boardcast.CallService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.nforetek.bt.phone.service_boardcast.CallService.backCarState;
+
 
 /**
  * Created by admin on 2018/9/30.
  */
 
 public class ShareInfoUtils {
-    private static final int backCarStateID = 16;
+    private static final int backCarStateID = 16;//倒车
+    private static final int srcID = 14;//源管理
     private static ShareDataManager mShareDataManager = ShareDataManager.getShareDataManager();
     /**
      * 从shareInfo中读取设置项
@@ -26,12 +30,12 @@ public class ShareInfoUtils {
         String strCommonSettingJSON = mShareDataManager.getShareData(backCarStateID);
         try {
             if (strCommonSettingJSON == null) {
-                Log.e("loadSkinInfo", "strCommonSettingJSON = null");
+                Log.d("loadSkinInfo", "strCommonSettingJSON = null");
                 return;
             } else {
                 JSONObject jsonObject = new JSONObject(strCommonSettingJSON);
                 boolean backCarState = jsonObject.getBoolean("backCarState");
-                Log.e("loadSkinInfo", "backCarState = "+backCarState);
+                Log.d("loadSkinInfo", "backCarState = "+backCarState);
                 CallService.backCarState = backCarState;
             }
 
@@ -47,8 +51,15 @@ public class ShareInfoUtils {
             JSONObject jsonObject = new JSONObject(s);
             if(jsonObject.has("backCarState")){
                 boolean backCarState = jsonObject.getBoolean("backCarState");
-                Log.e("parseSkinInfo", "backCarState = "+backCarState+"  context="+context);
+                Log.d("parseSkinInfo", "backCarState = "+backCarState+"  context="+context);
                 CallService.backCarState = backCarState;
+                if(backCarState){
+                    //在倒车 隐藏弹窗
+                    WindowDialog instance = WindowDialog.getInstance();
+                    if(instance != null && instance.mIsShow){
+                        instance.dismiss();
+                    }
+                }
                 if(!backCarState && context != null){
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                     management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
@@ -59,15 +70,40 @@ public class ShareInfoUtils {
             e.printStackTrace();
         }
     }
+    public static String currentUID = "";
+    public  static void parseSkinInfo1(String s) {
+        try {
+            JSONObject jsonObject = new JSONObject(s);
+            if(jsonObject.has("UID")){
+                String UID = jsonObject.getString("UID");
+                Log.d("parseSkinInfo", "UID = "+UID+"  context="+context);
+                if(!TextUtils.isEmpty(UID) && !UID.equals(currentUID) && context != null){
+                    currentUID = UID;
+                    CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                    if(UID.equals("ADAYO_SOURCE_BT_PHONE")){
+                        Log.d("parseSkinInfo", "parseSkinInfo1: ");
+                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
+                    } else {
+                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_YUAN);
+                    }
+                }
+            }
 
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
 
 
     public static IShareDataListener shareDataListener = new IShareDataListener(){
         @Override
         public void notifyShareData(int dataType,String s) {
-            Log.e("update share info","notifyShareData:"+s+",dataType="+dataType);
+            Log.d("update share info","notifyShareData:"+s+",dataType="+dataType);
             if (dataType == backCarStateID){
                 parseSkinInfo(s);
+            }
+            if (dataType == srcID){
+                parseSkinInfo1(s);
             }
         }
     };
@@ -83,8 +119,9 @@ public class ShareInfoUtils {
         if(mShareDataManager != null){
             loadSkinInfo();
             mShareDataManager.registerShareDataListener(backCarStateID,shareDataListener);
-        }else{
-            Log.e("register","ShareDataManager is null");
+            mShareDataManager.registerShareDataListener(srcID,shareDataListener);
+        } else {
+            Log.d("register","ShareDataManager is null");
         }
     }
     /**
@@ -93,9 +130,10 @@ public class ShareInfoUtils {
     public static void unregisterShareDataListener(){
         if(mShareDataManager != null){
             mShareDataManager.unregisterShareDataListener(backCarStateID,shareDataListener);
+            mShareDataManager.unregisterShareDataListener(srcID,shareDataListener);
             mShareDataManager = null;
         }else{
-            Log.e("unregister","ShareDataManager is null");
+            Log.d("unregister","ShareDataManager is null");
         }
     }
 

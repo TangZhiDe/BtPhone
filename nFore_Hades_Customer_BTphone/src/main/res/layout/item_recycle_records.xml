@@ -32,6 +32,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="22px"
+        android:textSize="22px"
         android:textColor="@color/btcolor14"
         android:layout_height="wrap_content" />
 </RelativeLayout>

@@ -176,14 +176,7 @@ public class CallService extends Service {
                         if (MyApplication.mBPresenter.getRecordsFragment() != null) {
                             MyApplication.mBPresenter.getRecordsFragment().getList();
                         }
-//                        if(BtPhoneMainActivity.btPhoneMainActivity != null){
-//                            MyApplication.mBPresenter.registerUiBluetoothPhoneChangeListerer(BtPhoneMainActivity.btPhoneMainActivity);
-//                            MyApplication.mBPresenter.registerUiBluetoothSettingChangeListerer(BtPhoneMainActivity.btPhoneMainActivity);
-//                        }
-
                     }
-
-
                     break;
                 case 0x06:
                     Log.d(TAG, "handleMessage: 蓝牙断开");
@@ -209,6 +202,9 @@ public class CallService extends Service {
                     if (MyApplication.callingActivity != null) {
                         MyApplication.callingActivity.finish();
                     }
+                    if(IncomingActivity.bTphoneCallActivity != null){
+                        IncomingActivity.bTphoneCallActivity.finish();
+                    }
                     if (MyApplication.mBPresenter != null) {
                         if (MyApplication.mBPresenter.getContactFragment() != null) {
                             MyApplication.mBPresenter.getContactFragment().notifyDataSetChanged();
@@ -224,30 +220,39 @@ public class CallService extends Service {
                             Bundle data = message.getData();
                             String address = data.getString("address");
                             String btDevConnAddr = mCommand.getBtDevConnAddr();
-                            if (address != null && !btDevConnAddr.equals(address)) {
-                                Log.d(TAG, "连接地址不同=====清空联系人及通话记录 =>" + btDevConnAddr + "<-------->" + address);
-                                mCommand.cleanTable(NforeBtBaseJar.CLEAN_TABLE_ALL);
-                                mCommand.setBtDevConnAddr(address);
-                                if (MyApplication.mBPresenter != null) {
-                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
-                                        MyApplication.mBPresenter.getContactFragment().notifyDataSetChanged();
-                                    }
-                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-                                        MyApplication.mBPresenter.getRecordsFragment().notifyDataSetChanged();
-                                    }
-
+                            Log.d(TAG, "上次连接地址<------>当前连接地址 ----" + btDevConnAddr + "<-------->" + address);
+                            if (MyApplication.mBPresenter != null) {
+                                if (MyApplication.mBPresenter.getContactFragment() != null) {
+                                    MyApplication.mBPresenter.getContactFragment().getList();
                                 }
-                            } else {
-                                Log.d(TAG, "连接地址相同 =====刷新联系人和通话记录");
-                                if (MyApplication.mBPresenter != null) {
-                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
-                                        MyApplication.mBPresenter.getContactFragment().getList();
-                                    }
-                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-                                        MyApplication.mBPresenter.getRecordsFragment().getList();
-                                    }
+                                if (MyApplication.mBPresenter.getRecordsFragment() != null) {
+                                    MyApplication.mBPresenter.getRecordsFragment().getList();
                                 }
                             }
+//                            if (address != null && !btDevConnAddr.equals(address)) {
+//                                Log.d(TAG, "连接地址不同=====清空联系人及通话记录 =>" + btDevConnAddr + "<-------->" + address);
+//                                mCommand.cleanTable(NforeBtBaseJar.CLEAN_TABLE_ALL);
+//                                mCommand.setBtDevConnAddr(address);
+//                                if (MyApplication.mBPresenter != null) {
+//                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
+//                                        MyApplication.mBPresenter.getContactFragment().notifyDataSetChanged();
+//                                    }
+//                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
+//                                        MyApplication.mBPresenter.getRecordsFragment().notifyDataSetChanged();
+//                                    }
+//
+//                                }
+//                            } else {
+//                                Log.d(TAG, "连接地址相同 =====刷新联系人和通话记录");
+//                                if (MyApplication.mBPresenter != null) {
+//                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
+//                                        MyApplication.mBPresenter.getContactFragment().getList();
+//                                    }
+//                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
+//                                        MyApplication.mBPresenter.getRecordsFragment().getList();
+//                                    }
+//                                }
+//                            }
 
                         }
                     } catch (RemoteException e) {

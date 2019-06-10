@@ -15,11 +15,14 @@ import com.nforetek.bt.base.listener.BluetoothSettingChangeListener;
 import com.nforetek.bt.base.listener.BluetoothSppChangeListener;
 import com.nforetek.bt.bean.CallLogs;
 import com.nforetek.bt.bean.Contacts;
+import com.nforetek.bt.phone.BtPhoneMainActivity;
 import com.nforetek.bt.phone.CallingActivity;
 import com.nforetek.bt.phone.ContactFragment;
+import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.RecordsFragment;
 import com.nforetek.bt.phone.pvcontract.IBtContract;
 import com.nforetek.bt.phone.tools.WindowDialog;
+import com.nforetek.bt.res.NfDef;
 
 import java.util.List;
 
@@ -50,6 +53,7 @@ public class BtPresenter implements
 
 	private CallingActivity callingActivity;
 	private WindowDialog windowDialog;
+	private BtPhoneMainActivity btPhoneMainActivity;
     
     /** 是否已储存ui通话记录到数据库 **/
     private static boolean isSetUiCallLogsToDB = false;
@@ -74,7 +78,15 @@ public class BtPresenter implements
 		mView.refresh();
 	}
 
-    /** 获取缓存联系人 **/
+	public BtPhoneMainActivity getBtPhoneMainActivity() {
+		return btPhoneMainActivity;
+	}
+
+	public void setBtPhoneMainActivity(BtPhoneMainActivity btPhoneMainActivity) {
+		this.btPhoneMainActivity = btPhoneMainActivity;
+	}
+
+	/** 获取缓存联系人 **/
     public List<Contacts> getContactsList() {
 		return contactsList;
 	}
@@ -1511,6 +1523,41 @@ public class BtPresenter implements
 	@Override
 	public void onPbapStateChanged(int sycnState) {
 		Log.i(TAG, "onPbapStateChanged sycnState---"+sycnState);
+		BtPhoneMainActivity mainActivity = getBtPhoneMainActivity();
+		if(mainActivity != null){
+			switch (sycnState) {
+				case NforeBtBaseJar.BT_SYNC_CONTACT:
+					//开始同步
+					MyApplication.isPbapDownload = true;
+					mainActivity.myHandler.sendEmptyMessage(0x02);
+					break;
+				case NforeBtBaseJar.BT_SYNC_COMPLETE_CALLLOGS:
+					//通话记录下载完成
+					Log.d(TAG, "onPbapStateChanged: 下载完成");
+					MyApplication.isPbapDownload = false;
+					mainActivity.myHandler.sendEmptyMessage(0x01);
+					break;
+				case NforeBtBaseJar.BT_SYNC_COMPLETE_CONTACT:
+					//通讯录下载完成
+					try {
+						if (MyApplication.connectAddress == "") {
+							MyApplication.connectAddress = getHfpConnectedAddress();
+						}
+
+						reqPbapDownload(MyApplication.connectAddress, NfDef.PBAP_STORAGE_CALL_LOGS, mainActivity.mProperty);
+						Log.d(TAG, "onPbapStateChanged: 开始下载通话记录" + MyApplication.connectAddress);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+					break;
+				case NforeBtBaseJar.BT_SYNC_INTERRUPTED:
+					//同步失败
+					Log.d(TAG, "onPbapStateChanged: 同步失败");
+					MyApplication.isPbapDownload = false;
+					mainActivity.myHandler.sendEmptyMessage(0x01);
+					break;
+			}
+		}
 		if(mPhoneChangeListener == null){
 			return;
 		}

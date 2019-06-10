@@ -213,14 +213,15 @@
             <TextView
                 android:id="@+id/keyboard_asterisk"
                 style="@style/Radio_button_first_style"
+                android:layout_centerVertical="true"
 
                 android:text="*" />
 
-            <TextView
-                android:id="@+id/keyboard_dou"
-                style="@style/Radio_button_second_style"
-                android:layout_marginBottom="10dp"
-                android:text="," />
+            <!--<TextView-->
+                <!--android:id="@+id/keyboard_dou"-->
+                <!--style="@style/Radio_button_second_style"-->
+                <!--android:layout_marginBottom="10dp"-->
+                <!--android:text="," />-->
         </RelativeLayout>
 
         <RelativeLayout
@@ -251,12 +252,13 @@
             <TextView
                 android:id="@+id/keyboard_pound"
                 style="@style/Radio_button_first_style"
+                android:layout_centerVertical="true"
                 android:text="#" />
 
-            <TextView
-                android:id="@+id/keyboard_fen"
-                style="@style/Radio_button_second_style"
-                android:text=";" />
+            <!--<TextView-->
+                <!--android:id="@+id/keyboard_fen"-->
+                <!--style="@style/Radio_button_second_style"-->
+                <!--android:text=";" />-->
         </RelativeLayout>
     </RelativeLayout>
 

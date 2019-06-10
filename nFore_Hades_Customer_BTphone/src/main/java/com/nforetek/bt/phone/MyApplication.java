@@ -28,6 +28,7 @@ public class MyApplication extends Application {
     private boolean isRegisterServiceListener;
     private static final String TAG = MyApplication.class.getCanonicalName();
     public static boolean isKeyboardShow = false;
+    public static boolean isPbapDownload = false;//是否在下载联系人
     @Override
     public void onCreate() {
         super.onCreate();

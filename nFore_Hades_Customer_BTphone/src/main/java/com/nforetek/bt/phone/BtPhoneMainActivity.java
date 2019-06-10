@@ -95,7 +95,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     private FrameLayout main_content;
     private RelativeLayout empty_loading;
     private ImageView ico_loading;
-    private int mProperty = NfDef.PBAP_PROPERTY_MASK_FN |
+    public int mProperty = NfDef.PBAP_PROPERTY_MASK_FN |
             NfDef.PBAP_PROPERTY_MASK_N |
             NfDef.PBAP_PROPERTY_MASK_TEL |
             NfDef.PBAP_PROPERTY_MASK_VERSION |
@@ -176,7 +176,10 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     protected void onStart() {
         super.onStart();
         disableShowInput(phone_num);
-//		btConnect();
+        if(MyApplication.isPbapDownload){
+            //正在下载联系人
+            myHandler.sendEmptyMessage(0x02);
+        }
         isopen();
 //        setCallView();
     }
@@ -237,9 +240,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         delete.setOnClickListener(this);
         keyboard_call.setOnClickListener(this);
         delete.setOnLongClickListener(this);
-        zero.setOnLongClickListener(this);
-        asterisk.setOnLongClickListener(this);
-        pound.setOnLongClickListener(this);
+//        zero.setOnLongClickListener(this);
+//        asterisk.setOnLongClickListener(this);
+//        pound.setOnLongClickListener(this);
         main_disconnect = findViewById(R.id.main_disconnect);
         main_disconnect.setOnClickListener(this);
         phone_num = findViewById(R.id.editnum_phone);
@@ -363,7 +366,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private Handler myHandler = new Handler(new Handler.Callback() {
+    public Handler myHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
             switch (message.what) {
@@ -438,35 +441,35 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onPbapStateChanged(int sycnState) {
         Log.d(TAG, "onPbapStateChanged: sycnState===" + sycnState);
-        switch (sycnState) {
-            case NforeBtBaseJar.BT_SYNC_CONTACT:
-                //开始同步
-                myHandler.sendEmptyMessage(0x02);
-                break;
-            case NforeBtBaseJar.BT_SYNC_COMPLETE_CALLLOGS:
-                //通话记录下载完成
-                Log.d(TAG, "onPbapStateChanged: 下载完成");
-                myHandler.sendEmptyMessage(0x01);
-                break;
-            case NforeBtBaseJar.BT_SYNC_COMPLETE_CONTACT:
-                //通讯录下载完成
-                try {
-                    if (MyApplication.connectAddress == "") {
-                        MyApplication.connectAddress = mBPresenter.getHfpConnectedAddress();
-                    }
-
-                    mBPresenter.reqPbapDownload(MyApplication.connectAddress, NfDef.PBAP_STORAGE_CALL_LOGS, mProperty);
-                    Log.d(TAG, "onPbapStateChanged: 开始下载通话记录" + MyApplication.connectAddress);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case NforeBtBaseJar.BT_SYNC_INTERRUPTED:
-                //同步失败
-                Log.d(TAG, "onPbapStateChanged: 同步失败");
-                myHandler.sendEmptyMessage(0x01);
-                break;
-        }
+//        switch (sycnState) {
+//            case NforeBtBaseJar.BT_SYNC_CONTACT:
+//                //开始同步
+//                myHandler.sendEmptyMessage(0x02);
+//                break;
+//            case NforeBtBaseJar.BT_SYNC_COMPLETE_CALLLOGS:
+//                //通话记录下载完成
+//                Log.d(TAG, "onPbapStateChanged: 下载完成");
+//                myHandler.sendEmptyMessage(0x01);
+//                break;
+//            case NforeBtBaseJar.BT_SYNC_COMPLETE_CONTACT:
+//                //通讯录下载完成
+//                try {
+//                    if (MyApplication.connectAddress == "") {
+//                        MyApplication.connectAddress = mBPresenter.getHfpConnectedAddress();
+//                    }
+//
+//                    mBPresenter.reqPbapDownload(MyApplication.connectAddress, NfDef.PBAP_STORAGE_CALL_LOGS, mProperty);
+//                    Log.d(TAG, "onPbapStateChanged: 开始下载通话记录" + MyApplication.connectAddress);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
+//                break;
+//            case NforeBtBaseJar.BT_SYNC_INTERRUPTED:
+//                //同步失败
+//                Log.d(TAG, "onPbapStateChanged: 同步失败");
+//                myHandler.sendEmptyMessage(0x01);
+//                break;
+//        }
     }
 
     private static class SpaceItemDecoration extends RecyclerView.ItemDecoration {
@@ -520,6 +523,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         mProxy.registeSourceActionCallBackFunc(AdayoSource.ADAYO_SOURCE_BT_PHONE, new ISourceActionCallBack.Stub() {
             @Override
             public void SourceOff() throws RemoteException {
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -577,6 +581,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //		params.height = 1020;
 //		getWindow().setAttributes(params);
         btPhoneMainActivity = this;
+        MyApplication.mBPresenter.setBtPhoneMainActivity(this);
         main_tabs = findViewById(R.id.main_tabs);
 //        RadioButton childAt = (RadioButton) main_tabs.getChildAt(0);
         tab_records = findViewById(R.id.tab_records);
@@ -636,6 +641,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MyApplication.mBPresenter.setBtPhoneMainActivity(null);
         unRegisterSourceOff();
         LogUtils.iL(TAG, "onDestroy");
     }
@@ -805,13 +811,13 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 phone_num.setText(input_number);
                 break;
             case R.id.numberxinghao:
-                onNumberClick(",");
+//                onNumberClick(",");
                 break;
             case R.id.number00:
                 onNumberClick("+");
                 break;
             case R.id.numberjinhao:
-                onNumberClick(";");
+//                onNumberClick(";");
                 break;
         }
         return false;
