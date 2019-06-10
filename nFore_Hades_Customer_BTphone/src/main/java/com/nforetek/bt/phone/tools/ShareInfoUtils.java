@@ -133,7 +133,7 @@ public class ShareInfoUtils {
             mShareDataManager.unregisterShareDataListener(srcID,shareDataListener);
             mShareDataManager = null;
         }else{
-            Log.d("unregister","ShareDataManager is null");
+//            Log.d("unregister","ShareDataManager is null");
         }
     }
 
