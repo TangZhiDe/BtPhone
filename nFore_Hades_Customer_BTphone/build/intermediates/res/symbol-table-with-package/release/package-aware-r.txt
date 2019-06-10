@@ -1108,9 +1108,7 @@ id keyboard_add
 id keyboard_asterisk
 id keyboard_call
 id keyboard_delete
-id keyboard_dou
 id keyboard_eight
-id keyboard_fen
 id keyboard_five
 id keyboard_four
 id keyboard_nine

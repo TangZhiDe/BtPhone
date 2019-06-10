@@ -186,7 +186,7 @@ public final class R {
         private id() {}
 
         public static final int background = 0x7f070024;
-        public static final int progress = 0x7f0700bc;
+        public static final int progress = 0x7f0700ba;
     }
     public static final class layout {
         private layout() {}

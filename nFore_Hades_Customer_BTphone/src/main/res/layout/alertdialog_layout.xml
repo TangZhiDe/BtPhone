@@ -62,7 +62,7 @@
             android:textSize="28px"
             android:background="@null"
             android:id="@+id/alert_bt_disconnect"
-            android:textColor="@color/tab_selected"
+            android:textColor="@drawable/select_dialog_btn"
             android:gravity="center"
             android:layout_height="match_parent" />
         <!--<View-->
@@ -77,7 +77,7 @@
             android:text="@string/string11"
             android:id="@+id/alert_bt_cancel"
             android:textSize="28px"
-            android:textColor="@color/btcolor9"
+            android:textColor="@drawable/select_dialog_btn"
             android:gravity="center"
             android:layout_height="match_parent" />
     </LinearLayout>
