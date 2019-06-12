@@ -1527,14 +1527,21 @@ public class BtPresenter implements
 		if(mainActivity != null){
 			switch (sycnState) {
 				case NforeBtBaseJar.BT_SYNC_CONTACT:
-					//开始同步
+					//开始同步联系人
 					MyApplication.isPbapDownload = true;
+					Log.d(TAG, "onPbapStateChanged: isPbapDownload = true");
 					mainActivity.myHandler.sendEmptyMessage(0x02);
+					break;
+				case NforeBtBaseJar.BT_SYNC_CALLLOGS:
+					//开始同步通话记录
+					MyApplication.isPbapDownload = true;
+					Log.d(TAG, "onPbapStateChanged: isPbapDownload = true");
 					break;
 				case NforeBtBaseJar.BT_SYNC_COMPLETE_CALLLOGS:
 					//通话记录下载完成
 					Log.d(TAG, "onPbapStateChanged: 下载完成");
 					MyApplication.isPbapDownload = false;
+					Log.d(TAG, "onPbapStateChanged: isPbapDownload = false");
 					mainActivity.myHandler.sendEmptyMessage(0x01);
 					break;
 				case NforeBtBaseJar.BT_SYNC_COMPLETE_CONTACT:
@@ -1554,6 +1561,7 @@ public class BtPresenter implements
 					//同步失败
 					Log.d(TAG, "onPbapStateChanged: 同步失败");
 					MyApplication.isPbapDownload = false;
+					Log.d(TAG, "onPbapStateChanged: isPbapDownload = false");
 					mainActivity.myHandler.sendEmptyMessage(0x01);
 					break;
 			}
@@ -1722,8 +1730,14 @@ public class BtPresenter implements
 	}
 
 	@Override
-	public void onMainDevicesChanged(String s, String s1) {
-
+	public void onMainDevicesChanged(String address, String name) {
+		Log.d(TAG, "onMainDevicesChanged: address---"+address+"----name---"+name);
+			if (getContactFragment() != null) {
+				getContactFragment().getList();
+			}
+			if (getRecordsFragment() != null) {
+				getRecordsFragment().getList();
+			}
 	}
 
 	@Override

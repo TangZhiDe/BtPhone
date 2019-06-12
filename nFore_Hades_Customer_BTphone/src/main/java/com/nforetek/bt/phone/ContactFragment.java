@@ -65,10 +65,10 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
     	LogUtils.iL(TAG, "onHiddenChanged");
         isHidden = hidden;
         Log.d(TAG, "onHiddenChanged: isHidden===="+isHidden );
-        if(!isHidden && needUpdate){
-            Log.d(TAG, "onHiddenChanged: 联系人碎片显示 刷新适配器" );
-            getList();
-        }
+//        if(!isHidden && needUpdate){
+//            Log.d(TAG, "onHiddenChanged: 联系人碎片显示 刷新适配器" );
+//            getList();
+//        }
 
         super.onHiddenChanged(hidden);
     }
@@ -171,10 +171,11 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
 //                }
 //            }
 //        });
-        manager = new MyLinearLayoutManager(getActivity());
-        manager.setOrientation(LinearLayoutManager.VERTICAL);
+        manager = new MyLinearLayoutManager(getActivity(),LinearLayoutManager.VERTICAL,false);
+//        manager.setRecycleChildrenOnDetach(true);
+//        manager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addItemDecoration(new SpaceItemDecoration(10));
+//        mRecyclerView.addItemDecoration(new SpaceItemDecoration(10));
         adapter = new SortAdapter(getActivity(), MyApplication.contactList);
         View contacts_empty = getContentView().findViewById(R.id.contacts_empty);
         mRecyclerView.setEmptyView(contacts_empty);
@@ -228,34 +229,48 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
         adapter.notifyDataSetChanged();
     }
     public  void getList() {
-        //!isHidden
-        if(!isHidden){
-            Log.d(TAG, "getList: isHidden==false开始刷新 needUpdate==false" );
-            needUpdate = false;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    MyApplication.contactList.clear();
-                    Log.d(TAG, "handleMessage: contactsListForDB 刷新列表");
-                    List<Contacts> contactsListForDB = null;
-                    List<Contacts> temp = new ArrayList<>();
-                    try {
-                        contactsListForDB = mBPresenter.getContactsListForDB();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                    if(contactsListForDB != null) {
-                        Collections.sort(contactsListForDB, new PinyinComparator());
-                            MyApplication.contactList.addAll(contactsListForDB);
-                            myHandler.sendEmptyMessage(0x00);
-
-                    }
-                }
-            }).start();
-        }else {
-            Log.d(TAG, "getList: isHidden==true   needUpdate==true" );
-            needUpdate = true;
+        MyApplication.contactList.clear();
+        Log.d(TAG, "handleMessage: contactsListForDB 刷新列表");
+        List<Contacts> contactsListForDB = null;
+        List<Contacts> temp = new ArrayList<>();
+        try {
+            contactsListForDB = mBPresenter.getContactsListForDB();
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
+        if(contactsListForDB != null) {
+            Collections.sort(contactsListForDB, new PinyinComparator());
+            MyApplication.contactList.addAll(contactsListForDB);
+        }
+        adapter.notifyDataSetChanged();
+        //!isHidden
+//        if(!isHidden){
+//            Log.d(TAG, "getList: isHidden==false开始刷新 needUpdate==false" );
+//            needUpdate = false;
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    MyApplication.contactList.clear();
+//                    Log.d(TAG, "handleMessage: contactsListForDB 刷新列表");
+//                    List<Contacts> contactsListForDB = null;
+//                    List<Contacts> temp = new ArrayList<>();
+//                    try {
+//                        contactsListForDB = mBPresenter.getContactsListForDB();
+//                    } catch (RemoteException e) {
+//                        e.printStackTrace();
+//                    }
+//                    if(contactsListForDB != null) {
+//                        Collections.sort(contactsListForDB, new PinyinComparator());
+//                            MyApplication.contactList.addAll(contactsListForDB);
+//                            myHandler.sendEmptyMessage(0x00);
+//
+//                    }
+//                }
+//            }).start();
+//        }else {
+//            Log.d(TAG, "getList: isHidden==true   needUpdate==true" );
+//            needUpdate = true;
+//        }
 
 
     }

@@ -2,8 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/fafbfc"
+    android:id="@+id/irc_item"
     android:layout_height="94px">
+    <!-- android:background="@drawable/selector_item_pressed"-->
     <!--<ImageView-->
         <!--android:layout_width="47px"-->
         <!--android:layout_alignParentLeft="true"-->
@@ -32,6 +33,10 @@
             android:gravity="center"
             android:id="@+id/irc_firName"
             android:textColor="#fff"
+            android:shadowColor="@color/bt_shadow_color"
+            android:shadowDx="4"
+            android:shadowDy="4"
+            android:shadowRadius="2"
             android:layout_gravity="bottom|right"
             android:textSize="40px"
             android:text=""

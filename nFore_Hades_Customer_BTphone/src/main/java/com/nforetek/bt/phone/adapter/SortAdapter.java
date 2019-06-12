@@ -2,6 +2,7 @@ package com.nforetek.bt.phone.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
     private LayoutInflater mInflater;
     private List<Contacts> mData;
     private Context mContext;
-    private View view;
+//    private View view;
     public String schar;
 
     public SortAdapter(Context context, List<Contacts> data) {
@@ -39,20 +40,21 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        view = mInflater.inflate(com.nforetek.bt.phone.R.layout.item_recycle_contact, parent, false);
+        View view = mInflater.inflate(com.nforetek.bt.phone.R.layout.item_recycle_contact, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
-        viewHolder.name = (TextView) view.findViewById(com.nforetek.bt.phone.R.id.irc_name);
-        viewHolder.firName = view.findViewById(com.nforetek.bt.phone.R.id.irc_firName);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        Log.d("TAG", "onBindViewHolder: "+position);
+
+        holder.view.setBackground(mContext.getResources().getDrawable(R.drawable.selector_item_pressed));
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
+            holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemClickListener.onItemClick(holder.itemView, position);
+                    mOnItemClickListener.onItemClick(v, position);
                 }
             });
         }
@@ -68,7 +70,6 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
             holder.name.setText(this.mData.get(position).getName());
             holder.firName.setText(this.mData.get(position).getName().substring(0));
         }
-
 
 
 
@@ -107,8 +108,12 @@ private getStringChar getStringChar;
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView name;
         private TextView firName;
+        private View view;
         public ViewHolder(View itemView) {
             super(itemView);
+            name = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_name);
+            firName = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_firName);
+            view = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_item);
         }
     }
 

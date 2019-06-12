@@ -175,9 +175,12 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: ");
         disableShowInput(phone_num);
-        if(MyApplication.isPbapDownload){
+        Log.d(TAG, "onStart:MyApplication.isPbapDownload= "+MyApplication.mBPresenter.getPbapDownLoadState());
+        if(MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CONTACT || MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CALLLOGS){
             //正在下载联系人
+            Log.d(TAG, "onStart: 开始下载");
             myHandler.sendEmptyMessage(0x02);
         }
         isopen();
@@ -371,6 +374,8 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         public boolean handleMessage(Message message) {
             switch (message.what) {
                 case 0x00:
+                    input_number ="";
+                    phone_num.setText("");
                     Bundle data = message.getData();
                     boolean isConnected = data.getBoolean("isConnected");
                     MyApplication.connectAddress = data.getString("address");

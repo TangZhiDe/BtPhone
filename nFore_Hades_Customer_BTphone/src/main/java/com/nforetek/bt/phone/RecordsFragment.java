@@ -159,24 +159,37 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     public void getList() {
         MyApplication.recordsList.clear();
         Log.d(TAG, "getList: 刷新列表");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<CallLogs> listForDB = null;
-                try {
-                    listForDB = mBPresenter.getCallLogsListForDB(0);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                if(listForDB!=null){
-                    Log.d(TAG, "handleMessage: listForDB.size=="+listForDB.size());
-                    MyApplication.recordsList.addAll(listForDB);
-                }else {
-                    Log.d(TAG, "handleMessage: listForDB==null");
-                }
-                myHandler.sendEmptyMessage(0x00);
-            }
-        }).start();
+        List<CallLogs> listForDB = null;
+        try {
+            listForDB = mBPresenter.getCallLogsListForDB(0);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        if(listForDB!=null){
+            Log.d(TAG, "handleMessage: listForDB.size=="+listForDB.size());
+            MyApplication.recordsList.addAll(listForDB);
+        }else {
+            Log.d(TAG, "handleMessage: listForDB==null");
+        }
+        adapter.notifyDataSetChanged();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                List<CallLogs> listForDB = null;
+//                try {
+//                    listForDB = mBPresenter.getCallLogsListForDB(0);
+//                } catch (RemoteException e) {
+//                    e.printStackTrace();
+//                }
+//                if(listForDB!=null){
+//                    Log.d(TAG, "handleMessage: listForDB.size=="+listForDB.size());
+//                    MyApplication.recordsList.addAll(listForDB);
+//                }else {
+//                    Log.d(TAG, "handleMessage: listForDB==null");
+//                }
+//                myHandler.sendEmptyMessage(0x00);
+//            }
+//        }).start();
 
 
     }

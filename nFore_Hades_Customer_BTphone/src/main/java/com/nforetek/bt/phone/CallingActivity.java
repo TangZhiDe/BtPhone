@@ -487,6 +487,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 break;
             case R.id.calling_hangup:
                 try {
+
                     if (mBPresenter != null && mBPresenter.isHfpConnected()) {
                         mBPresenter.reqHfpTerminateCurrentCall();
                     }

@@ -32,4 +32,7 @@
     <color name="btcolor15">#000</color>
     <color name="btcolor16">#222</color>
     <color name="btcolor17">#222</color>
+    <color name="bt_shadow_color">#f0f</color>
+    <color name="bt_item_press">#f4f4f7</color>
+    <!--59345571-->
 </resources>

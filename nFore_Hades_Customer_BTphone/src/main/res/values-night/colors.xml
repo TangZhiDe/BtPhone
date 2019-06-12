@@ -31,4 +31,7 @@
     <color name="btcolor15">#939dae</color>
     <color name="btcolor16">#fff</color>
     <color name="btcolor17">#939dae</color>
+    <color name="bt_shadow_color">#ff0</color>
+    <color name="bt_item_press">#161d29</color>
+    <!--#59161d29-->
 </resources>

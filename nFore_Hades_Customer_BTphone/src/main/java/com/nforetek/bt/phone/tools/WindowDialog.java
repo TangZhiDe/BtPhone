@@ -148,7 +148,7 @@ public class WindowDialog implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case com.nforetek.bt.phone.R.id.window_answer:
+            case R.id.window_answer:
                 try {
                     if(mBPresenter != null && mBPresenter.isHfpConnected()){
                         Log.d(TAG, "------------reqHfpAnswerCall---------------");
@@ -158,24 +158,30 @@ public class WindowDialog implements View.OnClickListener{
                     e.printStackTrace();
                 }
                 break;
-            case com.nforetek.bt.phone.R.id.window_hangup:
+            case R.id.window_hangup:
                 try {
-                    if(mBPresenter != null && mBPresenter.isHfpConnected()){
-                        Log.d(TAG, "------------reqHfpTerminateCurrentCall---------------");
-                        mBPresenter.reqHfpTerminateCurrentCall();
+                    List<NfHfpClientCall> hfpCallList = mBPresenter.getHfpCallList();
+                    if(mBPresenter != null && mBPresenter.isHfpConnected()  && hfpCallList != null && hfpCallList.size() >0){
+                        if(hfpCallList.get(0).getState() == NfHfpClientCall.CALL_STATE_INCOMING){
+                            Log.d(TAG, "------------reqHfpRejectIncomingCall---------------");
+                            mBPresenter.reqHfpRejectIncomingCall();
+                        }else {
+                            Log.d(TAG, "------------reqHfpTerminateCurrentCall---------------");
+                            mBPresenter.reqHfpTerminateCurrentCall();
+                        }
                     }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
                 break;
-            case com.nforetek.bt.phone.R.id.window_finish:
+            case R.id.window_finish:
                 //影藏弹窗，显示Activity
 
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
 
                 break;
-            case com.nforetek.bt.phone.R.id.window_decice:
+            case R.id.window_decice:
                 if(mBPresenter != null){
                     try {
                         if (mBPresenter.getHfpAudioConnectionState() == NfDef.STATE_CONNECTED){
@@ -191,7 +197,7 @@ public class WindowDialog implements View.OnClickListener{
                     }
                 }
                 break;
-            case com.nforetek.bt.phone.R.id.window_keyboard_btn:
+            case R.id.window_keyboard_btn:
                 //影藏弹窗，显示Activity,打开键盘
                 MyApplication.isKeyboardShow = true;
 
@@ -199,7 +205,7 @@ public class WindowDialog implements View.OnClickListener{
                 management1.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
 
                 break;
-            case com.nforetek.bt.phone.R.id.window_yuying:
+            case R.id.window_yuying:
                 //静音
                 if(mBPresenter != null){
                     try {

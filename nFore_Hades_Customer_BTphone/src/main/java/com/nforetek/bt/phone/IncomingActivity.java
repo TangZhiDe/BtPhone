@@ -158,7 +158,7 @@ public class IncomingActivity extends Activity {
             public void onClick(View v) {
                 try {
                     if(mBPresenter != null && mBPresenter.isHfpConnected()){
-                        mBPresenter.reqHfpTerminateCurrentCall();
+                        mBPresenter.reqHfpRejectIncomingCall();
                     }
                 } catch (RemoteException e) {
                     e.printStackTrace();

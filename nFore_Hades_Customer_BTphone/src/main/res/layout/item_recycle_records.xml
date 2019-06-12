@@ -2,8 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:background="@color/fafbfc"
+    android:id="@+id/irr_item"
     android:layout_height="90px">
+    <!--android:background="@drawable/selector_item_pressed"-->
     <ImageView
         android:layout_width="27px"
         android:layout_alignParentLeft="true"

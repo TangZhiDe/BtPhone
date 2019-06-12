@@ -67,7 +67,7 @@ public class CallInterfaceManagement {
                     Log.d(TAG, "showCallInterface: ----------------来电显示CallingActivity-------------");
                     if(IncomingActivity.bTphoneCallActivity == null){
                         Intent intent = new Intent();
-                        intent.setClass(context, CallingActivity.class);
+                        intent.setClass(context, IncomingActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
                     }

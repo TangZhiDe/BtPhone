@@ -60,6 +60,7 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
         }
 
         if(myViewHolder.view!=null){
+            myViewHolder.view.setBackground(context.getResources().getDrawable(R.drawable.selector_item_pressed));
             myViewHolder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -168,7 +169,7 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
             name = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_name);
             time = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_time);
             img = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_img);
-            view = itemView;
+            view = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_item);
         }
     }
 }
