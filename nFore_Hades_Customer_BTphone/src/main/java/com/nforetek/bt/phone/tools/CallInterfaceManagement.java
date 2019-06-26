@@ -4,11 +4,16 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.adayo.adayosource.AdayoSource;
+import com.adayo.proxy.sourcemngproxy.Beans.AppConfigType;
+import com.adayo.proxy.sourcemngproxy.Beans.SourceInfo;
+import com.adayo.proxy.sourcemngproxy.Control.SrcMngSwitchProxy;
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.phone.CallingActivity;
 import com.nforetek.bt.phone.IncomingActivity;
@@ -17,7 +22,11 @@ import com.nforetek.bt.phone.R;
 import com.nforetek.bt.phone.presenter.BtPresenter;
 import com.nforetek.bt.phone.service_boardcast.CallService;
 
+import java.util.HashMap;
 import java.util.List;
+
+import static com.adayo.proxy.share.utils.ContextUtil.getContext;
+import static com.adayo.proxy.sourcemngproxy.Beans.AppConfigType.SourceType.UI_AUDIO;
 
 /**
  * 这是管理通话界面的工具类
@@ -60,80 +69,106 @@ public class CallInterfaceManagement {
             Log.d(TAG, "showCallInterface: 正在倒车，不显示通话界面");
             return;
         }
-        boolean isBtAtTop = getTopAppPackageName(context);
-        switch (type){
-            case SHOW_TYPE_IN:
-                if(isBtAtTop){
-                    Log.d(TAG, "showCallInterface: ----------------来电显示CallingActivity-------------");
-                    if(IncomingActivity.bTphoneCallActivity == null){
-                        Intent intent = new Intent();
-                        intent.setClass(context, IncomingActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
+        Log.d(TAG, "showCallInterface:iCall_state= "+MyApplication.iCall_state);
+        if(MyApplication.iCall_state){
+            myHandler.sendEmptyMessage(1);
+        }else {
+            boolean isBtAtTop = getTopAppPackageName(context);
+            switch (type){
+                case SHOW_TYPE_IN:
+                    if(isBtAtTop){
+                        Log.d(TAG, "showCallInterface: ----------------来电显示CallingActivity-------------");
+                        if(IncomingActivity.bTphoneCallActivity == null){
+                            Intent intent = new Intent();
+                            intent.setClass(context, IncomingActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                        }
 
-                }else {
-                    Log.d(TAG, "showCallInterface: ----------------来电显示Window-------------");
+                    }else {
+                        Log.d(TAG, "showCallInterface: ----------------来电显示Window-------------");
+                        myHandler.sendEmptyMessage(0);
+                    }
+                    break;
+                case SHOW_TYPE_OUT:
+                    if(isBtAtTop){
+                        List<NfHfpClientCall> hfpCallList = null;
+                        try {
+                            hfpCallList = btPresenter.getHfpCallList();
+                            if(hfpCallList != null && hfpCallList.size()>0){
+                                if (MyApplication.callingActivity == null) {
+                                    Log.d(TAG, "------------显示Activity-----去电----------");
+                                    Intent intent = new Intent();
+                                    intent.setClass(context, CallingActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    context.startActivity(intent);
+                                }
+                            }
+
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else {
+                        Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
+                        myHandler.sendEmptyMessage(0);
+                    }
+                    break;
+                case SHOW_TYPE_DIALOG:
+                    ((Activity)context).moveTaskToBack(true);
+//                    catSource(false);
                     myHandler.sendEmptyMessage(0);
-                }
-                break;
-            case SHOW_TYPE_OUT:
-                if(isBtAtTop){
+                    break;
+                case SHOW_TYPE_YUAN:
+                    if(!getTopAppPackageName(context)){
+                        myHandler.sendEmptyMessage(0);
+                    }
+                    break;
+                case SHOW_TYPE_Activity:
+//                    WindowDialog instance = WindowDialog.getInstance();
+//                    if(instance != null){
+//                        instance.dismiss();
+//                    }
+                    WindowDialog.initInstance();
                     List<NfHfpClientCall> hfpCallList = null;
                     try {
                         hfpCallList = btPresenter.getHfpCallList();
                         if(hfpCallList != null && hfpCallList.size()>0){
-                            if (MyApplication.callingActivity == null) {
-                                Log.d(TAG, "------------显示Activity-----去电----------");
-                                Intent intent = new Intent();
-                                intent.setClass(context, CallingActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                context.startActivity(intent);
+                            NfHfpClientCall call = hfpCallList.get(0);
+                            if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
+                                setTopApp(true,context);
+                            }else {
+                                setTopApp(false,context);
                             }
                         }
 
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-
-                }else {
-                    Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
-                    myHandler.sendEmptyMessage(0);
-                }
-                break;
-            case SHOW_TYPE_DIALOG:
-                ((Activity)context).moveTaskToBack(true);
-                myHandler.sendEmptyMessage(0);
-                break;
-            case SHOW_TYPE_YUAN:
-                myHandler.sendEmptyMessage(0);
-                break;
-            case SHOW_TYPE_Activity:
-                WindowDialog instance = WindowDialog.getInstance();
-                if(instance != null){
-                    instance.dismiss();
-                }
-                List<NfHfpClientCall> hfpCallList = null;
-                try {
-                    hfpCallList = btPresenter.getHfpCallList();
-                    if(hfpCallList != null && hfpCallList.size()>0){
-                        NfHfpClientCall call = hfpCallList.get(0);
-                        if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
-                            setTopApp(true);
-                        }else {
-                            setTopApp(false);
-                        }
-                    }
-
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                break;
+                    break;
+            }
         }
+
 
     }
 
 
+
+    public static void catSource(boolean isON){
+        Log.d(TAG, "turnToMain:isON== " +isON);
+        SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
+        HashMap<String, String> map = new HashMap<>();
+        Bundle bundle =ActivityStartAnimHelper.addTransAnimParam(getContext(),R.anim.exit_anim,map);
+        int value ;
+        if(isON){
+            value = AppConfigType.SourceSwitch.APP_ON.getValue();
+        }else {
+            value = AppConfigType.SourceSwitch.APP_OFF.getValue();
+        }
+        SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_BT_PHONE,null,map,
+                value,  UI_AUDIO.getValue(),bundle);
+        srcMngSwitchProxy.onRequest(info);
+    }
 
     private Handler myHandler = new Handler(new Handler.Callback() {
         @Override
@@ -146,6 +181,23 @@ public class CallInterfaceManagement {
                         if(hfpCallList != null && hfpCallList.size()>0){
                             Log.d(TAG, "handleMessage: hfpCallList size="+hfpCallList.size());
                             WindowDialog instance = WindowDialog.getInstance(context);
+                            if(!instance.mIsShow){
+                                instance.show();
+                            }
+                        }
+
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
+                case 1:
+                    List<NfHfpClientCall> hfpCallList1 = null;
+                    try {
+                        hfpCallList1 = btPresenter.getHfpCallList();
+                        if(hfpCallList1 != null && hfpCallList1.size()>0){
+                            Log.d(TAG, "handleMessage: hfpCallList size="+hfpCallList1.size());
+                            WindowDialog1 instance = WindowDialog1.getInstance(context);
                             if(!instance.mIsShow){
                                 instance.show();
                             }
@@ -194,10 +246,10 @@ public class CallInterfaceManagement {
      *
      *
      */
-    public  void setTopApp(boolean isIncomming) {
+    public  void setTopApp(boolean isIncomming,Context mContext) {
 //        if (!getTopAppPackageName(context)) {
             /**获取ActivityManager*/
-            ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            ActivityManager activityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
             /**获得当前运行的task(任务)*/
             List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
@@ -205,7 +257,7 @@ public class CallInterfaceManagement {
             if(isIncomming){
                 for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
                     /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(context.getPackageName()+".IncomingActivity")) {
+                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".IncomingActivity")) {
                         Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
                         activityManager.moveTaskToFront(taskInfo.id, 0);
                         Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
@@ -216,7 +268,7 @@ public class CallInterfaceManagement {
             }else {
                 for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
                     /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(context.getPackageName()+".CallingActivity")) {
+                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".CallingActivity")) {
                         Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
                         activityManager.moveTaskToFront(taskInfo.id, 0);
                         Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
@@ -230,14 +282,14 @@ public class CallInterfaceManagement {
                 Log.d(TAG, "setTopApp: 启动CallingActivity" );
                 if(isIncomming){
                     Intent intent = new Intent();
-                    intent.setClass(context, IncomingActivity.class);
+                    intent.setClass(mContext, IncomingActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    mContext.startActivity(intent);
                 }else {
                     Intent intent = new Intent();
-                    intent.setClass(context, CallingActivity.class);
+                    intent.setClass(mContext, CallingActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    mContext.startActivity(intent);
                 }
 
             }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">nFore</string>
+    <string name="app_name">蓝牙电话</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <!-- service package -->
@@ -26,4 +26,5 @@
     <string name="string15">拨号…</string>
     <string name="string17">来电</string>
     <string name="string18">拨号</string>
+    <string name="string19">昨天</string>
 </resources>

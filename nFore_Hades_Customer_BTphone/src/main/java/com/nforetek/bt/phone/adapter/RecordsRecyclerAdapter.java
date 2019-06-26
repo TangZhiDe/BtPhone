@@ -24,8 +24,9 @@ import java.util.List;
 public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecyclerAdapter.MyViewHolder> {
     private Context context;
     private List<CallLogs> list;
-
+    private LayoutInflater mInflater;
     public RecordsRecyclerAdapter(Context context, List<CallLogs> list){
+        mInflater = LayoutInflater.from(context);
        this.context = context;
        this.list = list;
    }
@@ -35,7 +36,7 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
 
     @Override
     public MyViewHolder onCreateViewHolder( ViewGroup viewGroup, int viewType) {
-        View inflate = LayoutInflater.from(context).inflate(com.nforetek.bt.phone.R.layout.item_recycle_records, viewGroup, false);
+        View inflate = mInflater.inflate(R.layout.item_recycle_records, viewGroup, false);
 //        if(viewType == 1){
 //            inflate.setBackground(context.getDrawable(R.drawable.call_select_icon));
 //
@@ -60,7 +61,6 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
         }
 
         if(myViewHolder.view!=null){
-            myViewHolder.view.setBackground(context.getResources().getDrawable(R.drawable.selector_item_pressed));
             myViewHolder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -115,7 +115,7 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
 //                }
                 time = timeFormat(str);
             } else if (DateFormatter.isYesterday(date_year)) {
-                time = "昨天";
+                time = context.getResources().getString(R.string.string19);
             }else if (DateFormatter.isWeekDay(date_year)) {
                 time = DateFormatter.format(date_year, DateFormatter.Template.WEEK);
             } else {
@@ -169,7 +169,7 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
             name = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_name);
             time = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_time);
             img = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_img);
-            view = itemView.findViewById(com.nforetek.bt.phone.R.id.irr_item);
+            view = itemView;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.nforetek.bt.phone.service_boardcast;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,19 +21,15 @@ import android.util.Log;
 import android.view.View;
 
 import com.adayo.adayosource.AdayoSource;
-import com.adayo.proxy.share.interfaces.IShareDataListener;
 import com.adayo.proxy.sourcemngproxy.Control.SrcMngAudioSwitchProxy;
 import com.adayo.proxy.sourcemngproxy.Interface.IAdayoFocusChange;
 import com.adayo.systemserviceproxy.SystemServiceManager;
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.aidl.NfPbapContact;
+import com.nforetek.bt.aidl.UiCallbackBluetooth;
 import com.nforetek.bt.aidl.UiCallbackHfp;
 import com.nforetek.bt.aidl.UiCallbackPbap;
 import com.nforetek.bt.aidl.UiCommand;
-import com.nforetek.bt.base.jar.NforeBtBaseJar;
-import com.nforetek.bt.bean.Contacts;
-import com.nforetek.bt.phone.BtPhoneMainActivity;
-import com.nforetek.bt.phone.CallingActivity;
 import com.nforetek.bt.phone.IncomingActivity;
 import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.R;
@@ -42,6 +39,7 @@ import com.nforetek.bt.phone.tools.ShareInfoUtils;
 import com.nforetek.bt.phone.tools.WindowDialog;
 import com.nforetek.bt.res.NfDef;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -75,7 +73,7 @@ public class CallService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate: service 启动" );
+        Log.d(TAG, "onCreate: service 启动");
         String str_sev_action = (String) this.getResources().getText(R.string.str_sev_action);
         String str_sev_package = (String) this.getResources().getText(R.string.str_sev_package);
         Intent mIntent = new Intent(str_sev_action);
@@ -84,23 +82,69 @@ public class CallService extends Service {
         registerBroadcast();
         //注册ShareInfo
         ShareInfoUtils.registerShareDataListener(this);
-        if(SystemServiceManager. getInstance().conectsystemService()){
-            Log.i(TAG,"---------conectsystemService------------");
-            mAdayoVersion = SystemServiceManager. getInstance().getSystemConfigInfo((byte) 0x00);
-            Log.i(TAG,"--mAdayoVersion--"+ mAdayoVersion);
+        if (SystemServiceManager.getInstance().conectsystemService()) {
+            Log.i(TAG, "---------conectsystemService------------");
+            mAdayoVersion = SystemServiceManager.getInstance().getSystemConfigInfo((byte) 0x00);
+            Log.i(TAG, "--mAdayoVersion--" + mAdayoVersion);
         }
     }
 
+    @SuppressLint("WrongConstant")
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        flags = START_STICKY;
+        return super.onStartCommand(intent, flags, startId);
+    }
 
-    private void registerBroadcast(){
+
+    private void setBluetoothName() {
+        String name = "DFSK";
+        String btLocalAddress = getBluetoothAddress();
+        Log.d(TAG, "handleMessage: btLocalAddress=" + btLocalAddress);
+        if (btLocalAddress != null) {
+            String s = btLocalAddress.replaceAll(":", "");
+            if (s.length() > 6) {
+                name = s.substring(6);
+            }
+        }
+        try {
+            mCommand.setBtLocalName(name);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getBluetoothAddress() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            Log.d(TAG, "BluetoothAdapter: 蓝牙适配器为空");
+            return null;
+        }
+        Class<? extends BluetoothAdapter> btAdapterClass = adapter.getClass();
+        try {
+            Field mServiceField = adapter.getClass().getDeclaredField("mService");
+            mServiceField.setAccessible(true);
+            Object btManagerService = mServiceField.get(adapter);
+            if (btManagerService != null) {
+                return (String) btManagerService.getClass().getMethod("getAddress").invoke(btManagerService);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void registerBroadcast() {
         IntentFilter intentFilter = new IntentFilter("adayo.keyEvent.onKeyUp");
         fangKongReceiver = new FangKongReceiver();
-        registerReceiver(fangKongReceiver,intentFilter);
+        registerReceiver(fangKongReceiver, intentFilter);
         Log.d(TAG, "registerBroadcast: action = adayo.keyEvent.onKeyUp");
     }
 
-    private void unRegisterBroadcast(){
-        if(fangKongReceiver != null){
+    private void unRegisterBroadcast() {
+        if (fangKongReceiver != null) {
             unregisterReceiver(fangKongReceiver);
         }
     }
@@ -108,7 +152,7 @@ public class CallService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy: service销毁" );
+        Log.d(TAG, "onDestroy: service销毁");
         try {
             mCommand.unregisterHfpCallback(mCallbackHfp);
             mCommand.unregisterPbapCallback(mCallbackPbap);
@@ -152,6 +196,9 @@ public class CallService extends Service {
                         try {
                             mCommand.registerHfpCallback(mCallbackHfp);
                             mCommand.registerPbapCallback(mCallbackPbap);
+                            mCommand.registerBtCallback(mCallbackBluetooth);
+                            //设置蓝牙名称为地址后6位。
+                            setBluetoothName();
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
@@ -195,14 +242,14 @@ public class CallService extends Service {
 
                     break;
                 case 0x04:
-                    Log.d(TAG, "handleMessage: 蓝牙断开" );
+                    Log.d(TAG, "handleMessage: 蓝牙断开");
                     MyApplication.isKeyboardShow = false;
                     releaseAudioFocus();//结束通话释放焦点
                     WindowDialog.initInstance();
                     if (MyApplication.callingActivity != null) {
                         MyApplication.callingActivity.finish();
                     }
-                    if(IncomingActivity.bTphoneCallActivity != null){
+                    if (IncomingActivity.bTphoneCallActivity != null) {
                         IncomingActivity.bTphoneCallActivity.finish();
                     }
                     if (MyApplication.mBPresenter != null) {
@@ -221,39 +268,6 @@ public class CallService extends Service {
                             String address = data.getString("address");
                             String btDevConnAddr = mCommand.getBtDevConnAddr();
                             Log.d(TAG, "上次连接地址<------>当前连接地址 ----" + btDevConnAddr + "<-------->" + address);
-//                            if (MyApplication.mBPresenter != null) {
-//                                if (MyApplication.mBPresenter.getContactFragment() != null) {
-//                                    MyApplication.mBPresenter.getContactFragment().getList();
-//                                }
-//                                if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-//                                    MyApplication.mBPresenter.getRecordsFragment().getList();
-//                                }
-//                            }
-//                            if (address != null && !btDevConnAddr.equals(address)) {
-//                                Log.d(TAG, "连接地址不同=====清空联系人及通话记录 =>" + btDevConnAddr + "<-------->" + address);
-//                                mCommand.cleanTable(NforeBtBaseJar.CLEAN_TABLE_ALL);
-//                                mCommand.setBtDevConnAddr(address);
-//                                if (MyApplication.mBPresenter != null) {
-//                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
-//                                        MyApplication.mBPresenter.getContactFragment().notifyDataSetChanged();
-//                                    }
-//                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-//                                        MyApplication.mBPresenter.getRecordsFragment().notifyDataSetChanged();
-//                                    }
-//
-//                                }
-//                            } else {
-//                                Log.d(TAG, "连接地址相同 =====刷新联系人和通话记录");
-//                                if (MyApplication.mBPresenter != null) {
-//                                    if (MyApplication.mBPresenter.getContactFragment() != null) {
-//                                        MyApplication.mBPresenter.getContactFragment().getList();
-//                                    }
-//                                    if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-//                                        MyApplication.mBPresenter.getRecordsFragment().getList();
-//                                    }
-//                                }
-//                            }
-
                         }
                     } catch (RemoteException e) {
                         e.printStackTrace();
@@ -264,25 +278,6 @@ public class CallService extends Service {
         }
     });
 
-
-
-    public void onBackCarStateChange(){
-        List<NfHfpClientCall> hfpCallList = null;
-        if(mCommand == null){
-            Log.d(TAG, "onBackCarStateChange: mCommand = null");
-            return;
-        }
-        try {
-            hfpCallList = mCommand.getHfpCallList();
-            if (hfpCallList.size() == 1) {
-
-
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     /**
      * 获取前台应用
@@ -303,6 +298,8 @@ public class CallService extends Service {
         }
         return false;
     }
+
+
 
 
     /**
@@ -331,17 +328,116 @@ public class CallService extends Service {
     }
 
 
-    public void showView(){
+    private UiCallbackBluetooth mCallbackBluetooth = new UiCallbackBluetooth.Stub() {
 
-    }
+        @Override
+        public void onBluetoothServiceReady() throws RemoteException {
 
+        }
 
-    public  void showCall(){
-        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-        management.showCallInterface(CallService.this,CallInterfaceManagement.SHOW_TYPE_OUT);
-    }
+        @Override
+        public void onAdapterStateChanged(int i, int i1) throws RemoteException {
+            if (i1 == NfDef.BT_STATE_ON) {
+                //蓝牙开
+                //设置蓝牙名称为地址后6位。
+                setBluetoothName();
 
+            } else if (i1 == NfDef.BT_STATE_OFF) {
+                //蓝牙关
 
+            }
+        }
+
+        @Override
+        public void onAdapterDiscoverableModeChanged(int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onAdapterDiscoveryStarted() throws RemoteException {
+
+        }
+
+        @Override
+        public void onAdapterDiscoveryFinished() throws RemoteException {
+
+        }
+
+        @Override
+        public void retPairedDevices(int i, String[] strings, String[] strings1, int[] ints, byte[] bytes) throws RemoteException {
+
+        }
+
+        @Override
+        public void onDeviceFound(String s, String s1, byte b) throws RemoteException {
+
+        }
+
+        @Override
+        public void onDeviceBondStateChanged(String s, String s1, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onDeviceUuidsUpdated(String s, String s1, int i) throws RemoteException {
+
+        }
+
+        @Override
+        public void onLocalAdapterNameChanged(String s) throws RemoteException {
+
+        }
+
+        @Override
+        public void onDeviceOutOfRange(String s) throws RemoteException {
+
+        }
+
+        @Override
+        public void onDeviceAclDisconnected(String s) throws RemoteException {
+
+        }
+
+        @Override
+        public void onBtRoleModeChanged(int i) throws RemoteException {
+
+        }
+
+        @Override
+        public void onBtAutoConnectStateChanged(String s, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onBtBasicConnectStateChanged(String s, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onHfpStateChanged(String s, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onA2dpStateChanged(String s, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onAvrcpStateChanged(String s, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onPairStateChanged(String s, String s1, int i, int i1) throws RemoteException {
+
+        }
+
+        @Override
+        public void onMainDevicesChanged(String s, String s1) throws RemoteException {
+
+        }
+    };
     private UiCallbackHfp mCallbackHfp = new UiCallbackHfp.Stub() {
 
         @Override
@@ -409,42 +505,31 @@ public class CallService extends Service {
         public void onHfpCallChanged(String address, NfHfpClientCall call) throws RemoteException {
             Log.d(TAG, "onHfpCallChanged getNumber!!" + call.getNumber());
             Log.d(TAG, "onHfpCallChanged getState!!" + call.getState());
-            Log.d(TAG, "onHfpCallChanged: 车机型号=="+mAdayoVersion +" backCarState 倒车状态= "+backCarState);
+            Log.d(TAG, "onHfpCallChanged: 车机型号==" + mAdayoVersion + " backCarState 倒车状态= " + backCarState);
             // 去电：7 来电： 挂断：
             String callNumber = call.getNumber();
             String callName = "";
-            if(MyApplication.mBPresenter != null){
+            if (MyApplication.mBPresenter != null) {
                 callName = GetInfoFormContacts.getNameFromContacts(callNumber);
             }
-
-            if (call.getState() == NfHfpClientCall.CALL_STATE_ACTIVE) {  //通话中
+            if (call.getState() == NfHfpClientCall.CALL_STATE_ACTIVE) {//通话中
 //                    stopBell();
-                Log.d(TAG, "onHfpCallChanged:通话中: " + callName );
+                Log.d(TAG, "onHfpCallChanged:通话中: " + callName);
                 applyAudioFocus();
-                if(!backCarState){
+                if (!backCarState && !MyApplication.iCall_state) {
                     //不在倒车状态 显示界面
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                    management.showCallInterface(CallService.this,CallInterfaceManagement.SHOW_TYPE_OUT);
-//                    if (getTopAppPackageName(CallService.this)) {
-//                        if (MyApplication.callingActivity == null) {
-//                            Log.d(TAG, "onClick: 进入通话界面2");
-//                            Intent intent = new Intent();
-//                            intent.putExtra("number", callNumber);
-//                            intent.putExtra("name", callName);
-//                            intent.setClass(getBaseContext(), CallingActivity.class);
-//                            //获取当前view的bitmap
-//                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                            getApplication().startActivity(intent);
-//                        }
-//                    } else {
-//                        mhandler.sendEmptyMessage(0x02);
-//                    }
+                    management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
+                }
+                if (MyApplication.iCall_state && MyApplication.mBPresenter != null) {
+                    Log.d(TAG, "onHfpCallChanged: ibCall正在进行 蓝牙电话转为私密模式");
+                    MyApplication.mBPresenter.reqHfpAudioTransferToPhone();
                 }
 
                 if (IncomingActivity.bTphoneCallActivity != null) {
                     IncomingActivity.bTphoneCallActivity.finish();
                 }
-            }else if (call.getState() == NfHfpClientCall.CALL_STATE_TERMINATED) {  //结束通话
+            } else if (call.getState() == NfHfpClientCall.CALL_STATE_TERMINATED) {  //结束通话
 //                    stopBell();         //停止来电铃声
                 if (IncomingActivity.bTphoneCallActivity != null) {
                     IncomingActivity.bTphoneCallActivity.finish();
@@ -463,74 +548,32 @@ public class CallService extends Service {
                     Log.d(TAG, "------------CALL_STATE_INCOMING-----来电---------------");
                     applyAudioFocus();     //申请焦点
                     collapsingNotification(CallService.this);
-                    if(!backCarState){
+                    if (!backCarState) {
                         //不在倒车状态 显示界面
-//                        if (getTopAppPackageName(CallService.this)) {
-//                            Log.d(TAG, "------------显示Activity---------------");
-//                            if (IncomingActivity.bTphoneCallActivity == null) {
-//                                Intent intent = new Intent(getBaseContext(), IncomingActivity.class);
-//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                getApplication().startActivity(intent);
-//                            }
-//                        } else {
-//                            Log.d(TAG, "------------显示Dialog---------------");
-//                            mhandler.sendEmptyMessage(0x02);
-//                        }
-
-
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this,CallInterfaceManagement.SHOW_TYPE_IN);
+                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_IN);
                     }
 
 
-                }else if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {     //去电
+                } else if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {     //去电
                     Log.d(TAG, "onHfpCallChanged:去电电话1: " + callName);
-                    if(!backCarState) {
-                        //不在倒车状态 显示界面
-//                        if (getTopAppPackageName(CallService.this)) {
-//                            if (MyApplication.callingActivity == null) {
-//                                Intent intent = new Intent(getBaseContext(), CallingActivity.class);
-//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                intent.putExtra("number", callNumber);
-//                                intent.putExtra("name", callName);
-//                                getApplication().startActivity(intent);
-//                            }
-//                        } else {
-//                            mhandler.sendEmptyMessage(0x02);
-//                        }
-
+                    if (!backCarState) {
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this,CallInterfaceManagement.SHOW_TYPE_OUT);
+                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
                     }
-
 
 
                 }
             } else {
                 //去电 ||call.getState() == NfHfpClientCall.CALL_STATE_ALERTING
-                if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING ||call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {
+                if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {
                     Log.d(TAG, "onHfpCallChanged:去电电话2: " + callName);
                     applyAudioFocus();
-                    if(!backCarState) {
+                    if (!backCarState) {
                         //不在倒车状态 显示界面
-//                        if (getTopAppPackageName(CallService.this)) {
-//                            Log.d(TAG, "-------去电-----显示Activity---------------");
-//                            if (MyApplication.callingActivity == null) {
-//                                Log.d(TAG, "------------显示Activity-----去电----------");
-//                                Intent intent = new Intent();
-//                                intent.setClass(getBaseContext(), CallingActivity.class);
-//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                getApplication().startActivity(intent);
-//                            }
-//                        } else {
-//                            Log.d(TAG, "------------显示Dialog---去电------------");
-//                            mhandler.sendEmptyMessage(0x02);
-//                        }
-
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this,CallInterfaceManagement.SHOW_TYPE_OUT);
+                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
                     }
-
 
 
                 }
@@ -569,7 +612,7 @@ public class CallService extends Service {
         }
     };
 
-    private  UiCallbackPbap mCallbackPbap = new UiCallbackPbap.Stub(){
+    private UiCallbackPbap mCallbackPbap = new UiCallbackPbap.Stub() {
 
         @Override
         public void onPbapServiceReady() throws RemoteException {
@@ -621,11 +664,14 @@ public class CallService extends Service {
 
         }
     };
-    /** 获取日期时间 **/
-    private static String getDatetime(){
+
+    /**
+     * 获取日期时间
+     **/
+    private static String getDatetime() {
         SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");//设置日期格式
         SimpleDateFormat time = new SimpleDateFormat("HHmmss");//设置时间格式
-        return date.format(new Date())+"T"+time.format(new Date());
+        return date.format(new Date()) + "T" + time.format(new Date());
     }
 
     private void playBell() {
@@ -652,8 +698,6 @@ public class CallService extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-
     }
 
     /**
@@ -673,6 +717,15 @@ public class CallService extends Service {
 
     //释放焦点
     private void releaseAudioFocus() {
+        if (!audioFocus) {
+            Log.d(TAG, "applyAudioFocus: 音频焦点已经释放,不需要再次释放");
+            return;
+        }
+        try {
+            mCommand.pauseHfpRender();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         new Thread() {
             @Override
             public void run() {
@@ -693,7 +746,11 @@ public class CallService extends Service {
 
     //申请焦点
     private void applyAudioFocus() {
-        if(audioFocus){
+        if (MyApplication.iCall_state) {
+            Log.d(TAG, "applyAudioFocus: i/bCall 正在通话不申请焦点");
+            return;
+        }
+        if (audioFocus) {
             Log.d(TAG, "applyAudioFocus: 音频焦点已经获取,不需要再次获取");
             return;
         }
@@ -754,13 +811,18 @@ public class CallService extends Service {
                         }
                     }, CallService.this);
 
-                    //AudioManager.STREAM_VOICE_CALL   AUDIOFOCUS_GAIN_TRANSIENT
-                    if (mSrcMngAudioSwitchProxy.requestAdayoAudioFocus(6, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)) {//经江文尧工确认，换成混音AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                    //AudioManager.STREAM_VOICE_CALL   AUDIOFOCUS_GAIN_TRANSIENT AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                    if (mSrcMngAudioSwitchProxy.requestAdayoAudioFocus(6, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)) {//经江文尧工确认，换成混音AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
                         audioFocus = true;
-                        Log.i(TAG, "------------------------------------------申请焦点成功----------------------------------------------");
+                        Log.i(TAG, "------------------------------------------申请焦点成功-----AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------------");
+                        try {
+                            mCommand.startHfpRender();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         audioFocus = false;
-                        Log.i(TAG, "------------------------------------------申请焦点失败----------------------------------------------");
+                        Log.i(TAG, "------------------------------------------申请焦点失败-----------AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------");
                     }
                 } else {
                     Log.d(TAG, "mSrcMngAudioSwitchProxy is null");

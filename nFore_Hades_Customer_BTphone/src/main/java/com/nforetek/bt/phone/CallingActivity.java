@@ -65,7 +65,9 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
         MyApplication.callingActivity = this;
 
         mBPresenter = MyApplication.mBPresenter;
-        mBPresenter.setCallingActivity(this);
+        if(mBPresenter != null){
+            mBPresenter.setCallingActivity(this);
+        }
         Log.d(TAG, "onCreate: " );
         init();
     }
@@ -334,7 +336,9 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
 
     private void onNumberClick(String input) {
         try {
-            mBPresenter.reqHfpSendDtmf(input);
+            if(mBPresenter != null){
+                mBPresenter.reqHfpSendDtmf(input);
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -523,7 +527,9 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
-        mBPresenter.setCallingActivity(null);
+        if(mBPresenter != null){
+            mBPresenter.setCallingActivity(null);
+        }
         MyApplication.callingActivity = null;
 
     }

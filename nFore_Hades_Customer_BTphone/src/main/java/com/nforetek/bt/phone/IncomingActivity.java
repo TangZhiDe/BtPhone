@@ -67,38 +67,7 @@ public class IncomingActivity extends Activity {
             Log.d("IncomingActivity", "onNewIntent: +++++++++++++++++++++++++++++++");
         }
     }
-    private void autoAnswer() {
-        try {
-            if(mBPresenter.getBtAutoAnswerState()){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(5000);
-                            if(mBPresenter != null && mBPresenter.isHfpConnected()){
-                                if(callNumber!=null){
-                                    mBPresenter.reqHfpAnswerCall(NfDef.CALL_ACCEPT_NONE);
-//                                    Intent intent1 = new Intent();
-//                                    intent1.setClass(IncomingActivity.this,CallingActivity.class);
-//                                    intent1.putExtra("name",callName);
-//                                    intent1.putExtra("number",callNumber);
-//                                    intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                    startActivity(intent1);
-                                    finish();
-                                }
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (RemoteException e){
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     protected void onDestroy() {
@@ -114,31 +83,34 @@ public class IncomingActivity extends Activity {
         incoming_num = findViewById(R.id.incoming_num);
         calling_firName = findViewById(R.id.incoming_firName);
         calling_img_bg = findViewById(R.id.incoming_img_bg);
-        List<NfHfpClientCall> hfpCallList = null;
-        try {
-            hfpCallList = mBPresenter.getHfpCallList();
-            if(!hfpCallList.isEmpty()){
-                NfHfpClientCall call = hfpCallList.get(0);
-                callNumber = call.getNumber();
-                callName = GetInfoFormContacts.getNameFromContacts(callNumber);
-                if(callName != null && callName != ""){
-                    calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
-                    calling_firName.setVisibility(View.VISIBLE);
-                    calling_firName.setText(callName.substring(0));
-                }else {
-                    calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
-                    calling_firName.setVisibility(View.GONE);
-                }
-                incoming_name.setText(callName);
+        if(mBPresenter != null){
+            List<NfHfpClientCall> hfpCallList = null;
+            try {
+                hfpCallList = mBPresenter.getHfpCallList();
+                if(!hfpCallList.isEmpty()){
+                    NfHfpClientCall call = hfpCallList.get(0);
+                    callNumber = call.getNumber();
+                    callName = GetInfoFormContacts.getNameFromContacts(callNumber);
+                    if(callName != null && callName != ""){
+                        calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
+                        calling_firName.setVisibility(View.VISIBLE);
+                        calling_firName.setText(callName.substring(0));
+                    }else {
+                        calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
+                        calling_firName.setVisibility(View.GONE);
+                    }
+                    incoming_name.setText(callName);
 //                if("".equals(callName1)){
 //                    callName1 = callNumber;
 //                }
 
-            }
+                }
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
+
 
 
         incoming_num.setText(callNumber);

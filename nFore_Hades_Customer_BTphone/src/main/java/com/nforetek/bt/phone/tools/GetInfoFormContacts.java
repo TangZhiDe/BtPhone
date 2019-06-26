@@ -20,11 +20,11 @@ public class GetInfoFormContacts {
             for (int i = 0; i < MyApplication.contactList.size(); i++) {
                 Contacts contacts = MyApplication.contactList.get(i);
                 String numberJSON = contacts.getNumberJSON();
-                Log.e("GetInfoFormContacts", "numberJSON: "+numberJSON );
+//                Log.e("GetInfoFormContacts", "numberJSON: "+numberJSON );
                 List<String> list = JSON.parseArray(numberJSON, String.class);
 //                List<String> list = (List<String>) JSON.parseObject(numberJSON);
                 if(list != null && list.size()>0){
-                    Log.e("GetInfoFormContacts", "getNameFromContacts: "+list.get(0) );
+//                    Log.e("GetInfoFormContacts", "getNameFromContacts: "+list.get(0) );
                     if(list.get(0).equals(num)){
                         name = contacts.getName();
                     }

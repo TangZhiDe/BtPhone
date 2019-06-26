@@ -1,14 +1,12 @@
 package com.nforetek.bt.phone;
 
 import android.app.Application;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.util.Log;
 
 import com.nforetek.bt.bean.CallLogs;
 import com.nforetek.bt.bean.Contacts;
 import com.nforetek.bt.phone.presenter.BtPresenter;
-import com.nforetek.bt.phone.service_boardcast.CallService;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ public class MyApplication extends Application {
     private boolean isRegisterServiceListener;
     private static final String TAG = MyApplication.class.getCanonicalName();
     public static boolean isKeyboardShow = false;
-    public static boolean isPbapDownload = false;//是否在下载联系人
+    public static boolean iCall_state = false;//   i/bCall是否在通话中
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,9 +34,6 @@ public class MyApplication extends Application {
         isRegisterServiceListener = mBPresenter.registerServiceListener(this);
         CallInterfaceManagement instance = CallInterfaceManagement.getCallInterfaceManagementInstance();
         instance.setParms(this,mBPresenter);
-//        Intent service = new Intent(this,CallService.class);
-//        service.setPackage("com.nforetek.bt.phone");
-//        startService(service);
         Log.d(TAG, "onCreate: 实例化BtPresenter，绑定服务isRegisterServiceListener="+isRegisterServiceListener);
     }
 

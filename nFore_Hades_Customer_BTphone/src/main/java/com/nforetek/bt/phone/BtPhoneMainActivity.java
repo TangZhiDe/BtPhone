@@ -177,21 +177,19 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         super.onStart();
         Log.d(TAG, "onStart: ");
         disableShowInput(phone_num);
-        Log.d(TAG, "onStart:MyApplication.isPbapDownload= "+MyApplication.mBPresenter.getPbapDownLoadState());
-        if(MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CONTACT || MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CALLLOGS){
-            //正在下载联系人
-            Log.d(TAG, "onStart: 开始下载");
-            myHandler.sendEmptyMessage(0x02);
+        if(MyApplication.mBPresenter != null ){
+            Log.d(TAG, "onStart:MyApplication.isPbapDownload= "+MyApplication.mBPresenter.getPbapDownLoadState());
+            if( MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CONTACT || MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CALLLOGS){
+                //正在下载联系人
+                Log.d(TAG, "onStart: 开始下载");
+                myHandler.sendEmptyMessage(0x02);
+            }
         }
+
         isopen();
-//        setCallView();
     }
 
-    private void setCallView() {
-        Log.d(TAG, "setCallView: 用户点击电话");
-        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-        management.showCallInterface(BtPhoneMainActivity.this,CallInterfaceManagement.SHOW_TYPE_Activity);
-    }
+
 
     //	private boolean isBTConnect = false;
     private void btConnect(boolean isBTConnect) {
@@ -243,7 +241,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         delete.setOnClickListener(this);
         keyboard_call.setOnClickListener(this);
         delete.setOnLongClickListener(this);
-//        zero.setOnLongClickListener(this);
+        zero.setOnLongClickListener(this);
 //        asterisk.setOnLongClickListener(this);
 //        pound.setOnLongClickListener(this);
         main_disconnect = findViewById(R.id.main_disconnect);
@@ -272,19 +270,21 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void afterTextChanged(Editable s) {
                 if (MyApplication.contactList.size() > 0) {
+                    callRecyclerAdapter.changeText(s.toString().trim());
                     indexofNum(s.toString().trim());
                 }
                 if (s != null && s.length() > 0) {
                     if (!isPageShow) {
                         //输入第一个数字时显示页面
-                        main_fragment.setVisibility(View.GONE);
                         main_fit.setVisibility(View.VISIBLE);
+//                        main_fragment.setVisibility(View.GONE);
                         main_fit.setAnimation(BtUtils.makeInAnimation(BtPhoneMainActivity.this, false));
                         isPageShow = true;
+
                     }
 
                 } else {
-                    main_fragment.setVisibility(View.VISIBLE);
+//                    main_fragment.setVisibility(View.VISIBLE);
                     main_fit.setVisibility(View.GONE);
                     main_fit.setAnimation(BtUtils.makeOutAnimation(BtPhoneMainActivity.this, false));
                     phone_num.setCursorVisible(false);
@@ -303,7 +303,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         MyLinearLayoutManager myLinearLayoutManager = new MyLinearLayoutManager(getMContext(), LinearLayoutManager.VERTICAL, false);
         recycleview.setLayoutManager(myLinearLayoutManager);
         recycleview.addItemDecoration(new SpaceItemDecoration(10));
-        callRecyclerAdapter = new SortAdapter(this, callList);
+        callRecyclerAdapter = new SortAdapter(this, callList,0);
         recycleview.setAdapter(callRecyclerAdapter);
         callRecyclerAdapter.setOnItemClickListener(new SortAdapter.OnItemClickListener() {
             @Override
@@ -389,12 +389,16 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                     }
                     break;
                 case 0x01:
-                    if (mBPresenter.getContactFragment() != null) {
-                        mBPresenter.getContactFragment().getList();
+                    if(mBPresenter != null){
+//                        mBPresenter.getData();
+                        if (mBPresenter.getContactFragment() != null) {
+                            mBPresenter.getContactFragment().getList();
+                        }
+                        if (mBPresenter.getRecordsFragment() != null) {
+                            mBPresenter.getRecordsFragment().getList();
+                        }
                     }
-                    if (mBPresenter.getRecordsFragment() != null) {
-                        mBPresenter.getRecordsFragment().getList();
-                    }
+
                     main_content.setVisibility(View.VISIBLE);
                     empty_loading.setVisibility(View.GONE);
                     stopRotate();
@@ -586,7 +590,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //		params.height = 1020;
 //		getWindow().setAttributes(params);
         btPhoneMainActivity = this;
-        MyApplication.mBPresenter.setBtPhoneMainActivity(this);
+        if(MyApplication.mBPresenter != null){
+            MyApplication.mBPresenter.setBtPhoneMainActivity(this);
+        }
         main_tabs = findViewById(R.id.main_tabs);
 //        RadioButton childAt = (RadioButton) main_tabs.getChildAt(0);
         tab_records = findViewById(R.id.tab_records);
@@ -646,7 +652,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyApplication.mBPresenter.setBtPhoneMainActivity(null);
+        if(MyApplication.mBPresenter != null){
+            MyApplication.mBPresenter.setBtPhoneMainActivity(null);
+        }
         unRegisterSourceOff();
         LogUtils.iL(TAG, "onDestroy");
     }
@@ -742,6 +750,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //                    phone_num.setSelection(phone_num.length());
 //                }
                 StringBuffer sb = new StringBuffer(phone_num.getText().toString().trim());
+                if(sb.toString().length() == 0){
+                    return;
+                }
                 int index = 0;
                 if (phoneTextCursor == true) {
                     index = phone_num.getSelectionStart();
@@ -825,7 +836,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //                onNumberClick(";");
                 break;
         }
-        return false;
+        return true;
     }
 
     private void onNumberClick(String input) {

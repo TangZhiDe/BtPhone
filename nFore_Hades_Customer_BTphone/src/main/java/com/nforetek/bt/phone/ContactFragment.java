@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -62,14 +63,11 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
 
     @Override
     public void onHiddenChanged(boolean hidden) {
-    	LogUtils.iL(TAG, "onHiddenChanged");
         isHidden = hidden;
         Log.d(TAG, "onHiddenChanged: isHidden===="+isHidden );
-//        if(!isHidden && needUpdate){
-//            Log.d(TAG, "onHiddenChanged: 联系人碎片显示 刷新适配器" );
+        if(!hidden){
 //            getList();
-//        }
-
+        }
         super.onHiddenChanged(hidden);
     }
 
@@ -109,6 +107,7 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
     	LogUtils.iL(TAG, "getMContext");
         return super.getMContext();
     }
+
     
 	/**
      * Fragment实例化方法，用于向自身传送数据
@@ -138,9 +137,7 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
 		LogUtils.iL(TAG, "initView");
         init();
 	}
-
     private void init() {
-
         sideBar1 =  getContentView().findViewById(R.id.sidebar);
         contact_refresh = getContentView().findViewById(R.id.contact_refresh);
         mRecyclerView = getContentView().findViewById(R.id.recyclerview);
@@ -158,37 +155,51 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
                 }
             }
         });
-//        sideBar1.setOnSelectIndexItemListener(new WaveSideBar1.OnSelectIndexItemListener() {
-//            @Override
-//            public void onSelectIndexItem(String index) {
-//                if (adapter != null) {
-//                    if (adapter.getItemCount() > 0) {
-//                        int position = adapter.getPositionForSection(index.charAt(0));
-//                        if (position != -1) {
-//                            manager.scrollToPositionWithOffset(position, 0);
-//                        }
-//                    }
-//                }
-//            }
-//        });
         manager = new MyLinearLayoutManager(getActivity(),LinearLayoutManager.VERTICAL,false);
-//        manager.setRecycleChildrenOnDetach(true);
-//        manager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
 //        mRecyclerView.addItemDecoration(new SpaceItemDecoration(10));
-        adapter = new SortAdapter(getActivity(), MyApplication.contactList);
+        adapter = new SortAdapter(getActivity(), MyApplication.contactList,1);
         View contacts_empty = getContentView().findViewById(R.id.contacts_empty);
         mRecyclerView.setEmptyView(contacts_empty);
         mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //获取视图可将第一个itemId
+                if (recyclerView==null){
+                    return;
+                }else {
+                    //获取第一个可见view的位置
+                    if(MyApplication.contactList.size() != 0){
+                        int firstItemPosition = manager.findFirstVisibleItemPosition();
+                        String firstName=MyApplication.contactList.get(firstItemPosition).getPinyin();
+                        String sortString = firstName.substring(0, 1).toUpperCase();
+                        Log.e(TAG,"---sortString------"+sortString+"-----getPinyin--"+firstName);
+                        for (int i = 0; i < sideBar1.mLetters.length; i++) {
+                            if(sortString.equals(sideBar1.mLetters[i])){
+                                sideBar1.setChoose1(i);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+        });
         ImageView refresh = getContentView().findViewById(R.id.contacts_empty_refresh);
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: size=="+MyApplication.contactList.size()+" canRefresh=="+mRecyclerView.canRefresh);
-                if(MyApplication.contactList.size()>0 && !mRecyclerView.canRefresh){
-                    return;
+                if(mBPresenter != null){
+                    Log.d(TAG, "onClick: refresh");
+                    mBPresenter.refresh();
                 }
-                mBPresenter.refresh();
             }
         });
         //滑动监听
@@ -214,12 +225,11 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
         contact_refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: size=="+MyApplication.contactList.size()+" canRefresh=="+mRecyclerView.canRefresh);
-                if(MyApplication.contactList.size()>0 && !mRecyclerView.canRefresh){
-                    return;
+                if(mBPresenter != null){
+                    Log.d(TAG, "onClick: 刷新" );
+                    mBPresenter.refresh();
                 }
-                Log.d(TAG, "onClick: 刷新" );
-                mBPresenter.refresh();
+
             }
         });
         getList();
@@ -229,10 +239,13 @@ public class ContactFragment extends BaseFragment<BtPresenter>{
         adapter.notifyDataSetChanged();
     }
     public  void getList() {
+	    if(mBPresenter == null){
+            Log.d(TAG, "getList: mBPresenter == null");
+            return;
+        }
         MyApplication.contactList.clear();
         Log.d(TAG, "handleMessage: contactsListForDB 刷新列表");
         List<Contacts> contactsListForDB = null;
-        List<Contacts> temp = new ArrayList<>();
         try {
             contactsListForDB = mBPresenter.getContactsListForDB();
         } catch (RemoteException e) {

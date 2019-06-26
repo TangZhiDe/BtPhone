@@ -4,6 +4,7 @@ package com.nforetek.bt.phone.tools;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -40,7 +41,6 @@ public class ConfirmDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
-
         init();
     }
 
@@ -62,8 +62,9 @@ public class ConfirmDialog extends Dialog {
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         lp.width = 640;
         lp.height = 330;
-        lp.x = -250;
-        lp.y = 50;
+        lp.x = 360;
+        lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
+//        lp.y = 50;
 //        lp.gravity = Gravity.CENTER;
         dialogWindow.setAttributes(lp);
     }

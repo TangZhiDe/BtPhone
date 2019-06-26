@@ -212,7 +212,7 @@
 
             <TextView
                 android:id="@+id/keyboard_asterisk"
-                style="@style/Radio_button_first_style"
+                style="@style/Radio_button_three_style"
                 android:layout_centerVertical="true"
 
                 android:text="*" />
@@ -251,7 +251,7 @@
 
             <TextView
                 android:id="@+id/keyboard_pound"
-                style="@style/Radio_button_first_style"
+                style="@style/Radio_button_three_style"
                 android:layout_centerVertical="true"
                 android:text="#" />
 

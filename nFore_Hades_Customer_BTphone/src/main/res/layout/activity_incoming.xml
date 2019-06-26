@@ -22,10 +22,10 @@
             android:layout_alignParentTop="true">
 
             <ImageView
-                android:layout_width="27px"
-                android:layout_height="15px"
+                android:layout_width="42px"
+                android:layout_height="42px"
                 android:layout_centerInParent="true"
-                android:src="@drawable/keyboard_close" />
+                android:src="@drawable/select_collapse" />
         </RelativeLayout>
 
         <LinearLayout
@@ -37,10 +37,10 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
             <android.support.v7.widget.CardView
-                android:layout_width="190px"
-                app:cardCornerRadius="95px"
+                android:layout_width="204px"
+                app:cardCornerRadius="102px"
                 android:background="@color/fafbfc"
-                android:layout_height="190px">
+                android:layout_height="204px">
                 <ImageView
                     android:layout_width="match_parent"
                     android:src="@drawable/icon_contact_image_bg"
@@ -48,7 +48,7 @@
                     android:scaleType="center"
                     android:layout_height="match_parent" />
                 <TextView
-                    android:layout_width="155px"
+                    android:layout_width="185px"
                     android:gravity="center"
                     android:id="@+id/incoming_firName"
                     android:textColor="#fff"
@@ -59,7 +59,7 @@
                     android:layout_gravity="bottom|right"
                     android:textSize="170px"
                     android:text=""
-                    android:layout_height="155px" />
+                    android:layout_height="185px" />
             </android.support.v7.widget.CardView>
             <!--<RelativeLayout-->
                 <!--android:layout_width="201px"-->

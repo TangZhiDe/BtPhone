@@ -23,6 +23,7 @@ import com.nforetek.bt.phone.presenter.BtPresenter;
 import com.nforetek.bt.phone.tools.MyLinearLayoutManager;
 import com.nforetek.bt.phone.tools.RecyclerViewForEmpty;
 import com.nforetek.bt.res.NfDef;
+import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller;
 
 import java.util.List;
 
@@ -60,6 +61,9 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     @Override
     public void onHiddenChanged(boolean hidden) {
         LogUtils.iL(TAG, "onHiddenChanged");
+        if(!hidden){
+//            getList();
+        }
         super.onHiddenChanged(hidden);
     }
 
@@ -126,6 +130,8 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     @Override
     public void initView() {
         recycle = getContentView().findViewById(R.id.records_recycle);
+
+
         MyLinearLayoutManager myLinearLayoutManager = new MyLinearLayoutManager(getMContext(), LinearLayoutManager.VERTICAL, false);
         recycle.setLayoutManager(myLinearLayoutManager);
         adapter = new RecordsRecyclerAdapter(getMContext(), MyApplication.recordsList);
@@ -150,13 +156,20 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-             mBPresenter.refresh();
+                if(mBPresenter != null){
+                    Log.d(TAG, "onClick: refresh");
+                    mBPresenter.refresh();
+                }
             }
         });
         getList();
     }
 
     public void getList() {
+        if(mBPresenter == null){
+            Log.d(TAG, "getList: mBPresenter == null");
+            return;
+        }
         MyApplication.recordsList.clear();
         Log.d(TAG, "getList: 刷新列表");
         List<CallLogs> listForDB = null;
@@ -201,7 +214,6 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
                 case 0x00:
                     adapter.notifyDataSetChanged();
                     break;
-
             }
             return false;
         }

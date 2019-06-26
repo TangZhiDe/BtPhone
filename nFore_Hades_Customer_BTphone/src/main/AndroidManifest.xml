@@ -4,7 +4,6 @@
     android:sharedUserId="android.uid.system"
     android:versionCode="1"
     android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28"/>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -28,31 +27,38 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-        <!--|orientation|keyboardHidden-->
+        <!--|orientation|keyboardHidden
+            android:theme="@android:style/Theme.Black.NoTitleBar"-->
         <activity
             android:name=".BtPhoneMainActivity"
             android:label="@string/app_name"
-            android:configChanges="locale|uiMode"
             android:launchMode="singleTask"
-            android:taskAffinity="com.nforetek.bt.phone"
-            android:theme="@android:style/Theme.Black.NoTitleBar">
+            android:theme="@style/MainTheme"
+            android:taskAffinity="com.nforetek.bt.phone">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--android:launchMode="singleInstance"-->
+        <!--android:launchMode="singleInstance" android:configChanges="locale|uiMode"-->
         <activity
             android:name=".IncomingActivity"
-            android:configChanges="locale|uiMode"/>
+            />
 
         <service
             android:name=".service_boardcast.CallService"
-            android:exported="true" />
-
+            android:exported="true"
+            android:enabled="true"
+            android:permission="app.custom.permission" >
+            <intent-filter>
+                <action android:name="com.nforetek.bt.phone.callService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+<!--android:priority="2147483647"-->
         <receiver android:name=".service_boardcast.BootBroadcastReceiver">
-            <intent-filter android:priority="2147483647">
+            <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -66,10 +72,9 @@
                 <!--<action android:name="android.intent.action.LOCALE_CHANGED"/>-->
             <!--</intent-filter>-->
         <!--</receiver>-->
-
+<!--android:configChanges="locale|uiMode"-->
         <activity android:name=".CallingActivity"
-            android:configChanges="locale|uiMode">
-
+            >
         </activity>
     </application>
 

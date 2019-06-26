@@ -31,7 +31,10 @@
     <color name="btcolor15">#939dae</color>
     <color name="btcolor16">#fff</color>
     <color name="btcolor17">#939dae</color>
-    <color name="bt_shadow_color">#ff0</color>
-    <color name="bt_item_press">#161d29</color>
-    <!--#59161d29-->
+    <color name="btcolor18">#6f7b8c</color>
+    <color name="windowBackground">#182029</color>
+    <!--<color name="bt_shadow_color">#59161d29</color>-->
+    <color name="bt_shadow_color">#59161d29</color>
+    <drawable name="bt_item_press">#161d29</drawable>
+    <drawable name="bt_item_normal">#121924</drawable>
 </resources>

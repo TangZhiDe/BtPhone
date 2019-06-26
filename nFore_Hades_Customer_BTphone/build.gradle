@@ -44,4 +44,5 @@ dependencies {
 //    implementation files('libs/nForeAPI.jar')
     implementation files('libs/navi-proxy.jar')
     implementation(name: 'NaviCommonUi', ext: 'aar')
+    implementation 'com.quiph.ui:recyclerviewfastscroller:0.1.1-alpha'
 }

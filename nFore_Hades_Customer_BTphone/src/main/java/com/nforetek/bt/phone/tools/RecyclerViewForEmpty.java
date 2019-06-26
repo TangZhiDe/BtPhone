@@ -11,17 +11,14 @@ import android.view.View;
  */
 public class RecyclerViewForEmpty extends RecyclerView {
     private View emptyView;
-    public boolean canRefresh = true;
     private AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onChanged() {
             Adapter adapter = getAdapter();
             if (adapter.getItemCount() == 0) {
-                canRefresh = false;
                 emptyView.setVisibility(VISIBLE);
                 RecyclerViewForEmpty.this.setVisibility(GONE);
             } else {
-                canRefresh = true;
                 emptyView.setVisibility(GONE);
                 RecyclerViewForEmpty.this.setVisibility(VISIBLE);
             }

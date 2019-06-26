@@ -34,6 +34,7 @@ public class WaveSideBar extends View {
     private int mTextColor;
 
     private int mChoose = -1;
+    private int mChoose1 = -1;
 
     private final float mDensity;
     private float mY;
@@ -81,6 +82,11 @@ public class WaveSideBar extends View {
 
     public void setChoose(int choose) {
         this.mChoose = choose;
+        invalidate();
+    }
+
+    public void setChoose1(int choose) {
+        this.mChoose1 = choose;
         invalidate();
     }
 
@@ -160,9 +166,7 @@ public class WaveSideBar extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         mHalfWidth = w - dip2px(16);
         mHalfHeight = h - getPaddingTop() - getPaddingBottom();
-
         float lettersLen = getLettersSize();
-
         mLetterHeight = mHalfHeight / lettersLen;
         int textSize = (int) (mHalfHeight * 0.7f / lettersLen);
         this.mPaint.setTextSize(textSize);
@@ -174,6 +178,7 @@ public class WaveSideBar extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         for (int i = 0; i < getLettersSize(); i++) {
+
             float letterPosY = mLetterHeight * (i + 1) + getPaddingTop();
             float diff, diffY, diffX;
             if (mChoose == i && i != 0 && i != getLettersSize() - 1) {
@@ -197,9 +202,14 @@ public class WaveSideBar extends View {
             canvas.save();
             canvas.scale(diff, diff, mHalfWidth * 1.20f + diffX, letterPosY + diffY);
             if (diff == 1f) {
+                if(mChoose1 == i){
+                    this.mPaint.setColor(getResources().getColor(R.color.tab_selected));
+                }else {
+                    this.mPaint.setColor(this.mTextColor);
+                }
                 this.mPaint.setAlpha(255);
-                this.mPaint.setColor(this.mTextColor);
                 this.mPaint.setTypeface(Typeface.DEFAULT);
+
             } else {
                 int alpha = (int) (255 * (1 - Math.min(0.9, diff - 1)));
                 this.mPaint.setColor(this.mTextColor);

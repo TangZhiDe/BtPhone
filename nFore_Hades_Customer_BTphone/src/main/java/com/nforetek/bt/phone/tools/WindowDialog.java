@@ -64,7 +64,9 @@ public class WindowDialog implements View.OnClickListener{
         this.mBPresenter = MyApplication.mBPresenter;
         this.x = 0;
         this.y = 0;
-        mBPresenter.setWindowDialog(this);
+        if(mBPresenter != null){
+            mBPresenter.setWindowDialog(this);
+        }
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.dialog_window, null);
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -90,7 +92,9 @@ public class WindowDialog implements View.OnClickListener{
             Log.d(TAG, "initInstance: ===null" );
             instance.dismiss();
             instance = null;
-            mBPresenter.setWindowDialog(null);
+            if(mBPresenter != null){
+                mBPresenter.setWindowDialog(null);
+            }
             if(window_answer_animation != null && window_answer_animation.isRunning()){
                 window_answer_animation.stop();
             }
@@ -118,29 +122,31 @@ public class WindowDialog implements View.OnClickListener{
         window_keyboard_btn.setOnClickListener(this);
         window_yuying.setOnClickListener(this);
         window_answer_animation = (AnimationDrawable) window_answer.getBackground();
-        List<NfHfpClientCall> hfpCallList = null;
-        try {
-            hfpCallList = mBPresenter.getHfpCallList();
-            if(!hfpCallList.isEmpty()){
-                NfHfpClientCall call = hfpCallList.get(0);
-                String callNumber = call.getNumber();
-                String callName1 = GetInfoFormContacts.getNameFromContacts(callNumber);
-                if("".equals(callName1)){
-                    callName1 = callNumber;
-                }
-                if(call.getState() == NfHfpClientCall.CALL_STATE_DIALING){
-                    window_type.setText(context.getResources().getString(R.string.string18));
-                }else if(call.getState() ==NfHfpClientCall.CALL_STATE_ACTIVE){
+        if(mBPresenter != null){
+            List<NfHfpClientCall> hfpCallList = null;
+            try {
+                hfpCallList = mBPresenter.getHfpCallList();
+                if(!hfpCallList.isEmpty()){
+                    NfHfpClientCall call = hfpCallList.get(0);
+                    String callNumber = call.getNumber();
+                    String callName1 = GetInfoFormContacts.getNameFromContacts(callNumber);
+                    if("".equals(callName1)){
+                        callName1 = callNumber;
+                    }
+                    if(call.getState() == NfHfpClientCall.CALL_STATE_DIALING){
+                        window_type.setText(context.getResources().getString(R.string.string18));
+                    }else if(call.getState() ==NfHfpClientCall.CALL_STATE_ACTIVE){
 //                    window_type.setText("通话中");
-                }else if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
-                    window_type.setText(context.getResources().getString(R.string.string17));
+                    }else if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
+                        window_type.setText(context.getResources().getString(R.string.string17));
+                    }
+                    window_firName.setText(callName1.substring(0));
+                    window_name.setText(callName1);
                 }
-                window_firName.setText(callName1.substring(0));
-                window_name.setText(callName1);
-            }
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -160,23 +166,26 @@ public class WindowDialog implements View.OnClickListener{
                 break;
             case R.id.window_hangup:
                 try {
-                    List<NfHfpClientCall> hfpCallList = mBPresenter.getHfpCallList();
-                    if(mBPresenter != null && mBPresenter.isHfpConnected()  && hfpCallList != null && hfpCallList.size() >0){
-                        if(hfpCallList.get(0).getState() == NfHfpClientCall.CALL_STATE_INCOMING){
-                            Log.d(TAG, "------------reqHfpRejectIncomingCall---------------");
-                            mBPresenter.reqHfpRejectIncomingCall();
-                        }else {
-                            Log.d(TAG, "------------reqHfpTerminateCurrentCall---------------");
-                            mBPresenter.reqHfpTerminateCurrentCall();
+                    if(mBPresenter != null){
+                        List<NfHfpClientCall> hfpCallList = mBPresenter.getHfpCallList();
+                        if( mBPresenter.isHfpConnected()  && hfpCallList != null && hfpCallList.size() >0){
+                            if(hfpCallList.get(0).getState() == NfHfpClientCall.CALL_STATE_INCOMING){
+                                Log.d(TAG, "------------reqHfpRejectIncomingCall---------------");
+                                mBPresenter.reqHfpRejectIncomingCall();
+                            }else {
+                                Log.d(TAG, "------------reqHfpTerminateCurrentCall---------------");
+                                mBPresenter.reqHfpTerminateCurrentCall();
+                            }
                         }
                     }
+
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
                 break;
             case R.id.window_finish:
                 //影藏弹窗，显示Activity
-
+                dismiss();
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
 
@@ -199,8 +208,8 @@ public class WindowDialog implements View.OnClickListener{
                 break;
             case R.id.window_keyboard_btn:
                 //影藏弹窗，显示Activity,打开键盘
+                dismiss();
                 MyApplication.isKeyboardShow = true;
-
                 CallInterfaceManagement management1 = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management1.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
 

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.adayo.app.utils.LogUtils;
 import com.adayo.proxy.share.ShareDataManager;
 import com.adayo.proxy.share.interfaces.IShareDataListener;
+import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.service_boardcast.CallService;
 
 import org.json.JSONException;
@@ -22,6 +23,7 @@ import static com.nforetek.bt.phone.service_boardcast.CallService.backCarState;
 public class ShareInfoUtils {
     private static final int backCarStateID = 16;//倒车
     private static final int srcID = 14;//源管理
+    private static final int iCallID = 52;//源管理call_state
     private static ShareDataManager mShareDataManager = ShareDataManager.getShareDataManager();
     /**
      * 从shareInfo中读取设置项
@@ -77,7 +79,7 @@ public class ShareInfoUtils {
             if(jsonObject.has("UID")){
                 String UID = jsonObject.getString("UID");
                 Log.d("parseSkinInfo", "UID = "+UID+"  context="+context);
-                if(!TextUtils.isEmpty(UID) && !UID.equals(currentUID) && context != null){
+                if(!TextUtils.isEmpty(UID) && !UID.equals(currentUID) && context != null && !MyApplication.iCall_state){
                     currentUID = UID;
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                     if(UID.equals("ADAYO_SOURCE_BT_PHONE")){
@@ -86,6 +88,24 @@ public class ShareInfoUtils {
                     } else {
                         management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_YUAN);
                     }
+                }
+            }
+
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
+    public  static void parseSkinInfo2(String s) {
+        try {
+            JSONObject jsonObject = new JSONObject(s);
+            if(jsonObject.has("call_state")){
+                boolean call_state = jsonObject.getBoolean("call_state");
+                Log.d("parseSkinInfo", "call_state = "+call_state);
+                MyApplication.iCall_state = call_state;
+                if(!call_state){
+                    Log.i("parseSkinInfo", "parseSkinInfo2: ibCall结束显示通话界面");
+                    CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                    management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
                 }
             }
 
@@ -105,6 +125,9 @@ public class ShareInfoUtils {
             if (dataType == srcID){
                 parseSkinInfo1(s);
             }
+            if (dataType == iCallID){
+                parseSkinInfo2(s);
+            }
         }
     };
     private static Context context;
@@ -120,6 +143,7 @@ public class ShareInfoUtils {
             loadSkinInfo();
             mShareDataManager.registerShareDataListener(backCarStateID,shareDataListener);
             mShareDataManager.registerShareDataListener(srcID,shareDataListener);
+            mShareDataManager.registerShareDataListener(iCallID,shareDataListener);
         } else {
             Log.d("register","ShareDataManager is null");
         }
@@ -131,6 +155,7 @@ public class ShareInfoUtils {
         if(mShareDataManager != null){
             mShareDataManager.unregisterShareDataListener(backCarStateID,shareDataListener);
             mShareDataManager.unregisterShareDataListener(srcID,shareDataListener);
+            mShareDataManager.unregisterShareDataListener(iCallID,shareDataListener);
             mShareDataManager = null;
         }else{
 //            Log.d("unregister","ShareDataManager is null");

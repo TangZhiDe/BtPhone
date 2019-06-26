@@ -2,12 +2,13 @@ package com.nforetek.bt.phone.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.alibaba.fastjson.JSON;
 import com.nforetek.bt.bean.Contacts;
 import com.nforetek.bt.phone.R;
@@ -24,12 +25,13 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
     private LayoutInflater mInflater;
     private List<Contacts> mData;
     private Context mContext;
-//    private View view;
+    private int type;
+    private String changeStr = "";
     public String schar;
-
-    public SortAdapter(Context context, List<Contacts> data) {
+    public SortAdapter(Context context, List<Contacts> data,int type) {
         mInflater = LayoutInflater.from(context);
         mData = data;
+        this.type = type;
         this.mContext = context;
     }
 
@@ -40,8 +42,13 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(com.nforetek.bt.phone.R.layout.item_recycle_contact, parent, false);
+        View view = mInflater.inflate(R.layout.item_recycle_contact, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
+        if(type == 0){
+            viewHolder.num.setVisibility(View.VISIBLE);
+        }else {
+            viewHolder.num.setVisibility(View.GONE);
+        }
         return viewHolder;
     }
 
@@ -49,7 +56,6 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         Log.d("TAG", "onBindViewHolder: "+position);
 
-        holder.view.setBackground(mContext.getResources().getDrawable(R.drawable.selector_item_pressed));
         if (mOnItemClickListener != null) {
             holder.view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -58,21 +64,34 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
                 }
             });
         }
+
+        String numberJSON = this.mData.get(position).getNumberJSON();
+        List<String> list = JSON.parseArray(numberJSON, String.class);
+        if(type == 0){
+            if(list != null && list.size()>0){
+                if(list.get(0).contains(changeStr)){
+                    int index = list.get(0).indexOf(changeStr);
+                    int len = changeStr.length();
+                    Spanned temp = Html.fromHtml(list.get(0).substring(0, index)
+                            + "<font color="+mContext.getResources().getColor(R.color.device_name) + ">"
+                            + list.get(0).substring(index, index + len) + "</font>"
+                            + list.get(0).substring(index + len, list.get(0).length()));
+                    holder.num.setText(temp);
+                }else {
+                    holder.num.setText(list.get(0));
+                }
+            }
+        }
         if(this.mData.get(position).getName().isEmpty()){
-            String numberJSON = this.mData.get(position).getNumberJSON();
-            List<String> list = JSON.parseArray(numberJSON, String.class);
             if(list != null && list.size()>0){
                 holder.name.setText(list.get(0));
                 holder.firName.setText("");
             }
 
-        }else {
+        } else {
             holder.name.setText(this.mData.get(position).getName());
             holder.firName.setText(this.mData.get(position).getName().substring(0));
         }
-
-
-
     }
 
     @Override
@@ -91,6 +110,14 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
         this.mOnItemClickListener = mOnItemClickListener;
     }
 
+    //这个方法很重要，editText监听文本变化需要用到
+    public void changeText(String textStr) {
+        this.changeStr = textStr;
+//        notifyDataSetChanged();
+
+    }
+
+
     //***************************************************************
 
 //*******************************************************
@@ -108,12 +135,14 @@ private getStringChar getStringChar;
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView name;
         private TextView firName;
+        private TextView num;
         private View view;
         public ViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_name);
             firName = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_firName);
-            view = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_item);
+            num = itemView.findViewById(com.nforetek.bt.phone.R.id.irc_num);
+            view = itemView;
         }
     }
 
