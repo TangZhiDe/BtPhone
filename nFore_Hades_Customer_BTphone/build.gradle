@@ -41,6 +41,7 @@ dependencies {
     implementation files('libs/systemservice-proxy.jar')
     implementation files('libs/adayosource-proxy.jar')
     implementation files('libs/sharedata-proxy.jar')
+    implementation files('libs/SettingsService-proxy.jar')
 //    implementation files('libs/nForeAPI.jar')
     implementation files('libs/navi-proxy.jar')
     implementation(name: 'NaviCommonUi', ext: 'aar')

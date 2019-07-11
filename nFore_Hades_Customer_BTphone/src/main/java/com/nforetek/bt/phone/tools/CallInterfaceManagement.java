@@ -2,6 +2,7 @@ package com.nforetek.bt.phone.tools;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ public class CallInterfaceManagement {
     public final static int SHOW_TYPE_Activity = 2;//显示Activity
     public final static int SHOW_TYPE_OUT = 3;//去电
     public final static int SHOW_TYPE_YUAN = 4;//显示弹窗
+    public final static int SHOW_TYPE_HIDE = 5;//隐藏
     private static CallInterfaceManagement mModel;
     private Context context;
 
@@ -67,6 +69,13 @@ public class CallInterfaceManagement {
     public void showCallInterface(Context context,int type){
         if(CallService.backCarState){
             Log.d(TAG, "showCallInterface: 正在倒车，不显示通话界面");
+            WindowDialog instance = WindowDialog.getInstance();
+            if(instance != null && instance.mIsShow){
+                instance.dismiss();
+            }
+//            setToBack(context);//当倒车时将通话界面隐藏
+            BtUtils.finish(CallingActivity.callingActivity);
+            BtUtils.finish(IncomingActivity.bTphoneCallActivity);
             return;
         }
         Log.d(TAG, "showCallInterface:iCall_state= "+MyApplication.iCall_state);
@@ -77,13 +86,14 @@ public class CallInterfaceManagement {
             switch (type){
                 case SHOW_TYPE_IN:
                     if(isBtAtTop){
-                        Log.d(TAG, "showCallInterface: ----------------来电显示CallingActivity-------------");
-                        if(IncomingActivity.bTphoneCallActivity == null){
+                        if(IncomingActivity.bTphoneCallActivity == null || IncomingActivity.bTphoneCallActivity.isFinishing()){
+                            Log.d(TAG, "showCallInterface: ----------------来电显示IncomingActivity-------------");
                             Intent intent = new Intent();
                             intent.setClass(context, IncomingActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(intent);
                         }
+
 
                     }else {
                         Log.d(TAG, "showCallInterface: ----------------来电显示Window-------------");
@@ -96,13 +106,14 @@ public class CallInterfaceManagement {
                         try {
                             hfpCallList = btPresenter.getHfpCallList();
                             if(hfpCallList != null && hfpCallList.size()>0){
-                                if (MyApplication.callingActivity == null) {
+                                if (CallingActivity.callingActivity == null || CallingActivity.callingActivity.isFinishing()) {
                                     Log.d(TAG, "------------显示Activity-----去电----------");
                                     Intent intent = new Intent();
                                     intent.setClass(context, CallingActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     context.startActivity(intent);
                                 }
+
                             }
 
                         } catch (RemoteException e) {
@@ -146,6 +157,7 @@ public class CallInterfaceManagement {
                         e.printStackTrace();
                     }
                     break;
+
             }
         }
 
@@ -214,9 +226,6 @@ public class CallInterfaceManagement {
         }
     });
 
-    private void show(boolean isBtAtTop){
-
-    }
 
 
     /**
@@ -239,6 +248,7 @@ public class CallInterfaceManagement {
         }
         return false;
     }
+
 
     /**
      * 将本应用置顶到最前端

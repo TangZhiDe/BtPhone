@@ -7,8 +7,8 @@ import android.util.Log;
 import com.nforetek.bt.bean.CallLogs;
 import com.nforetek.bt.bean.Contacts;
 import com.nforetek.bt.phone.presenter.BtPresenter;
+import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +20,13 @@ import java.util.List;
 public class MyApplication extends Application {
     public static List<Contacts> contactList = new ArrayList<>();
     public static List<CallLogs> recordsList = new ArrayList<>();
-    public static CallingActivity callingActivity = null;
     public static String connectAddress ="";
     public static BtPresenter mBPresenter;
     private boolean isRegisterServiceListener;
     private static final String TAG = MyApplication.class.getCanonicalName();
     public static boolean isKeyboardShow = false;
     public static boolean iCall_state = false;//   i/bCall是否在通话中
+    public static String Verson = "_V2.6";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -42,30 +42,22 @@ public class MyApplication extends Application {
         super.onConfigurationChanged(newConfig);
         Log.d(TAG, "onConfigurationChanged: uiMode===" +newConfig.uiMode+"---locale="+newConfig.locale.toString());
         if(newConfig.uiMode == 19 || newConfig.uiMode == 35){
-            finishApp();
+//            finishApp();
         }
 
         if(newConfig.locale.toString().equals("zh_CN") || newConfig.locale.toString().equals("en")){
-            finishApp();
+//            finishApp();
         }
 
     }
 
-    public void finishApp(){
+    public static void finishApp(){
         Log.d(TAG, "finishApp: " );
-        if(callingActivity != null){
-            Log.d(TAG, "finishApp: callingActivity" );
-            callingActivity.finish();
-        }
-        if(IncomingActivity.bTphoneCallActivity != null){
-            Log.d(TAG, "finishApp: IncomingActivity" );
-            IncomingActivity.bTphoneCallActivity.finish();
-        }
-        if(BtPhoneMainActivity.btPhoneMainActivity != null){
-            Log.d(TAG, "finishApp: BtPhoneMainActivity" );
-            BtPhoneMainActivity.btPhoneMainActivity.finish();
-        }
+        BtUtils.finish(CallingActivity.callingActivity);
+        BtUtils.finish(BtPhoneMainActivity.btPhoneMainActivity);
+        BtUtils.finish(IncomingActivity.bTphoneCallActivity );
     }
+
 
     @Override
     public void onTerminate() {
@@ -78,6 +70,7 @@ public class MyApplication extends Application {
             mBPresenter = null;
         }
     }
+
 
 
 }

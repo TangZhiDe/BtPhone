@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class RecordsFragment extends BaseFragment<BtPresenter> {
 
-    private static final String TAG = RecordsFragment.class.getCanonicalName();
+    private static final String TAG = RecordsFragment.class.getCanonicalName()+MyApplication.Verson;
     private BtPresenter mBPresenter;
     private RecyclerViewForEmpty recycle;
     private RecordsRecyclerAdapter adapter;
@@ -61,10 +61,15 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     @Override
     public void onHiddenChanged(boolean hidden) {
         LogUtils.iL(TAG, "onHiddenChanged");
-        if(!hidden){
+        if (!hidden) {
 //            getList();
         }
         super.onHiddenChanged(hidden);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -130,8 +135,6 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     @Override
     public void initView() {
         recycle = getContentView().findViewById(R.id.records_recycle);
-
-
         MyLinearLayoutManager myLinearLayoutManager = new MyLinearLayoutManager(getMContext(), LinearLayoutManager.VERTICAL, false);
         recycle.setLayoutManager(myLinearLayoutManager);
         adapter = new RecordsRecyclerAdapter(getMContext(), MyApplication.recordsList);
@@ -156,7 +159,7 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mBPresenter != null){
+                if (mBPresenter != null) {
                     Log.d(TAG, "onClick: refresh");
                     mBPresenter.refresh();
                 }
@@ -166,7 +169,12 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     }
 
     public void getList() {
-        if(mBPresenter == null){
+
+        myHandler.sendEmptyMessage(0x00);
+
+    }
+    public void getListForDB() {
+        if (mBPresenter == null) {
             Log.d(TAG, "getList: mBPresenter == null");
             return;
         }
@@ -178,32 +186,14 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        if(listForDB!=null){
-            Log.d(TAG, "handleMessage: listForDB.size=="+listForDB.size());
+        if (listForDB != null) {
+            Log.d(TAG, "handleMessage: listForDB.size==" + listForDB.size());
             MyApplication.recordsList.addAll(listForDB);
-        }else {
+        } else {
             Log.d(TAG, "handleMessage: listForDB==null");
         }
-        adapter.notifyDataSetChanged();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<CallLogs> listForDB = null;
-//                try {
-//                    listForDB = mBPresenter.getCallLogsListForDB(0);
-//                } catch (RemoteException e) {
-//                    e.printStackTrace();
-//                }
-//                if(listForDB!=null){
-//                    Log.d(TAG, "handleMessage: listForDB.size=="+listForDB.size());
-//                    MyApplication.recordsList.addAll(listForDB);
-//                }else {
-//                    Log.d(TAG, "handleMessage: listForDB==null");
-//                }
-//                myHandler.sendEmptyMessage(0x00);
-//            }
-//        }).start();
 
+        myHandler.sendEmptyMessage(0x00);
 
     }
 
@@ -212,6 +202,30 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         public boolean handleMessage(Message message) {
             switch (message.what) {
                 case 0x00:
+                    if (mBPresenter != null) {
+                        Log.d(TAG, "getList: mBPresenter == null");
+                        MyApplication.recordsList.clear();
+                        Log.d(TAG, "getList: 刷新列表");
+                        List<CallLogs> listForDB = null;
+                        try {
+                            listForDB = mBPresenter.getCallLogsListForDB(0);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        if (listForDB != null) {
+                            Log.d(TAG, "handleMessage: listForDB.size==" + listForDB.size());
+                            MyApplication.recordsList.addAll(listForDB);
+                        } else {
+                            Log.d(TAG, "handleMessage: listForDB==null");
+                        }
+                        adapter.setRecordsList(MyApplication.recordsList);
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    break;
+                case 0x01:
+                    MyApplication.recordsList.clear();
+                    adapter.setRecordsList(MyApplication.recordsList);
                     adapter.notifyDataSetChanged();
                     break;
             }
@@ -219,9 +233,10 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         }
     });
 
-    public void notifyDataSetChanged(){
-        MyApplication.recordsList.clear();
-        adapter.notifyDataSetChanged();
+    public void clearRecords() {
+
+        myHandler.sendEmptyMessage(0x01);
+
     }
 
     /**
@@ -237,8 +252,6 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
     public void setBPresenter(BtPresenter btPresenter) {
         this.mBPresenter = btPresenter;
     }
-
-
 
 
 }

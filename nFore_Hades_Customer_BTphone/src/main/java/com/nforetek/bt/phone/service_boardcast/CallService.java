@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.adayo.adayosource.AdayoSource;
+import com.adayo.proxy.settings.SettingExternalManager;
 import com.adayo.proxy.sourcemngproxy.Control.SrcMngAudioSwitchProxy;
 import com.adayo.proxy.sourcemngproxy.Interface.IAdayoFocusChange;
 import com.adayo.systemserviceproxy.SystemServiceManager;
@@ -30,9 +31,11 @@ import com.nforetek.bt.aidl.UiCallbackBluetooth;
 import com.nforetek.bt.aidl.UiCallbackHfp;
 import com.nforetek.bt.aidl.UiCallbackPbap;
 import com.nforetek.bt.aidl.UiCommand;
+import com.nforetek.bt.phone.CallingActivity;
 import com.nforetek.bt.phone.IncomingActivity;
 import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.R;
+import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.GetInfoFormContacts;
 import com.nforetek.bt.phone.tools.ShareInfoUtils;
@@ -47,7 +50,7 @@ import java.util.List;
 
 
 public class CallService extends Service {
-    protected static String TAG = CallService.class.getCanonicalName();
+    protected static String TAG = CallService.class.getCanonicalName()+MyApplication.Verson;
     private final int CALL = 1;
     private MediaPlayer mediaPlayer;
     private SrcMngAudioSwitchProxy mSrcMngAudioSwitchProxy;
@@ -93,6 +96,7 @@ public class CallService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         flags = START_STICKY;
+        Log.d(TAG, "onStartCommand: ");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -135,9 +139,10 @@ public class CallService extends Service {
             return null;
         }
     }
-
+    public static final String mConfigChangeAction = "com.adayo.setting.configChange";
     private void registerBroadcast() {
         IntentFilter intentFilter = new IntentFilter("adayo.keyEvent.onKeyUp");
+        intentFilter.addAction(mConfigChangeAction);
         fangKongReceiver = new FangKongReceiver();
         registerReceiver(fangKongReceiver, intentFilter);
         Log.d(TAG, "registerBroadcast: action = adayo.keyEvent.onKeyUp");
@@ -159,6 +164,9 @@ public class CallService extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        Intent intent = new Intent();
+        intent.setAction("com.nforetek.bt.phone04.startService");
+        sendBroadcast(intent);
         ShareInfoUtils.unregisterShareDataListener();
         unbindService(mConnection);
         unRegisterBroadcast();
@@ -211,53 +219,31 @@ public class CallService extends Service {
                     instance.show();
                     break;
                 case 0x03:
-                    Log.d(TAG, "handleMessage: 通话结束或蓝牙断开");
+                    Log.d(TAG, "handleMessage: 通话结束");
                     MyApplication.isKeyboardShow = false;
                     releaseAudioFocus();//结束通话释放焦点
                     WindowDialog.initInstance();
-                    if (MyApplication.callingActivity != null) {
-                        Log.d(TAG, "handleMessage: callingActivity finish");
-                        MyApplication.callingActivity.finish();
-                    }
                     if (MyApplication.mBPresenter != null) {
+                        BtUtils.finish(MyApplication.mBPresenter.getCallingActivity());
                         if (MyApplication.mBPresenter.getRecordsFragment() != null) {
                             MyApplication.mBPresenter.getRecordsFragment().getList();
                         }
                     }
                     break;
-                case 0x06:
-                    Log.d(TAG, "handleMessage: 蓝牙断开");
-                    MyApplication.isKeyboardShow = false;
-                    releaseAudioFocus();//结束通话释放焦点
-                    WindowDialog.initInstance();
-                    if (MyApplication.callingActivity != null) {
-                        MyApplication.callingActivity.finish();
-                    }
-                    if (MyApplication.mBPresenter != null) {
-                        if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-                            MyApplication.mBPresenter.getRecordsFragment().getList();
-                        }
-                    }
 
-
-                    break;
                 case 0x04:
                     Log.d(TAG, "handleMessage: 蓝牙断开");
                     MyApplication.isKeyboardShow = false;
                     releaseAudioFocus();//结束通话释放焦点
                     WindowDialog.initInstance();
-                    if (MyApplication.callingActivity != null) {
-                        MyApplication.callingActivity.finish();
-                    }
-                    if (IncomingActivity.bTphoneCallActivity != null) {
-                        IncomingActivity.bTphoneCallActivity.finish();
-                    }
+                    BtUtils.finish(CallingActivity.callingActivity);
+                    BtUtils.finish(IncomingActivity.bTphoneCallActivity);
                     if (MyApplication.mBPresenter != null) {
                         if (MyApplication.mBPresenter.getContactFragment() != null) {
-                            MyApplication.mBPresenter.getContactFragment().notifyDataSetChanged();
+                            MyApplication.mBPresenter.getContactFragment().clearContacts();
                         }
                         if (MyApplication.mBPresenter.getRecordsFragment() != null) {
-                            MyApplication.mBPresenter.getRecordsFragment().notifyDataSetChanged();
+                            MyApplication.mBPresenter.getRecordsFragment().clearRecords();
                         }
                     }
                     break;
@@ -278,26 +264,6 @@ public class CallService extends Service {
         }
     });
 
-
-    /**
-     * 获取前台应用
-     */
-    public static boolean getTopAppPackageName(Context context) {
-        try {
-            ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-            if (!rti.isEmpty()) {
-                String packageName = rti.get(0).topActivity.getPackageName();
-                Log.d(TAG, "getTopAppPackageName:packageName==== " + packageName);
-                if (packageName.equals(context.getPackageName())) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-
-        }
-        return false;
-    }
 
 
 
@@ -448,9 +414,7 @@ public class CallService extends Service {
         @Override
         public void onHfpStateChanged(String address, int prevState, int newState) throws RemoteException {
             if (newState == NfDef.STATE_READY) {//蓝牙已断开连接
-                if (IncomingActivity.bTphoneCallActivity != null) {
-                    IncomingActivity.bTphoneCallActivity.finish();
-                }
+                BtUtils.finish(IncomingActivity.bTphoneCallActivity);
 //                stopBell();
                 Log.d(TAG, "蓝牙已断开连接");
                 mhandler.sendEmptyMessage(0x04);
@@ -515,7 +479,7 @@ public class CallService extends Service {
             if (call.getState() == NfHfpClientCall.CALL_STATE_ACTIVE) {//通话中
 //                    stopBell();
                 Log.d(TAG, "onHfpCallChanged:通话中: " + callName);
-                applyAudioFocus();
+                applyAudioFocus(call.getState());
                 if (!backCarState && !MyApplication.iCall_state) {
                     //不在倒车状态 显示界面
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
@@ -525,16 +489,10 @@ public class CallService extends Service {
                     Log.d(TAG, "onHfpCallChanged: ibCall正在进行 蓝牙电话转为私密模式");
                     MyApplication.mBPresenter.reqHfpAudioTransferToPhone();
                 }
-
-                if (IncomingActivity.bTphoneCallActivity != null) {
-                    IncomingActivity.bTphoneCallActivity.finish();
-                }
+                BtUtils.finish(IncomingActivity.bTphoneCallActivity);
             } else if (call.getState() == NfHfpClientCall.CALL_STATE_TERMINATED) {  //结束通话
 //                    stopBell();         //停止来电铃声
-                if (IncomingActivity.bTphoneCallActivity != null) {
-                    IncomingActivity.bTphoneCallActivity.finish();
-                }
-
+                BtUtils.finish(IncomingActivity.bTphoneCallActivity);
                 List<NfHfpClientCall> hfpCallList = mCommand.getHfpCallList();
                 if (hfpCallList.size() == 0) {
                     mhandler.sendEmptyMessage(0x03);
@@ -546,7 +504,7 @@ public class CallService extends Service {
 //来电
                 if (call.getState() == NfHfpClientCall.CALL_STATE_INCOMING) {   //来电
                     Log.d(TAG, "------------CALL_STATE_INCOMING-----来电---------------");
-                    applyAudioFocus();     //申请焦点
+                    applyAudioFocus(call.getState());     //申请焦点
                     collapsingNotification(CallService.this);
                     if (!backCarState) {
                         //不在倒车状态 显示界面
@@ -568,7 +526,7 @@ public class CallService extends Service {
                 //去电 ||call.getState() == NfHfpClientCall.CALL_STATE_ALERTING
                 if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {
                     Log.d(TAG, "onHfpCallChanged:去电电话2: " + callName);
-                    applyAudioFocus();
+                    applyAudioFocus(call.getState());
                     if (!backCarState) {
                         //不在倒车状态 显示界面
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
@@ -721,11 +679,7 @@ public class CallService extends Service {
             Log.d(TAG, "applyAudioFocus: 音频焦点已经释放,不需要再次释放");
             return;
         }
-        try {
-            mCommand.pauseHfpRender();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        setParms(false,7);
         new Thread() {
             @Override
             public void run() {
@@ -745,7 +699,7 @@ public class CallService extends Service {
     }
 
     //申请焦点
-    private void applyAudioFocus() {
+    private void applyAudioFocus(final int state) {
         if (MyApplication.iCall_state) {
             Log.d(TAG, "applyAudioFocus: i/bCall 正在通话不申请焦点");
             return;
@@ -765,49 +719,52 @@ public class CallService extends Service {
                         @Override
                         public void onGainAfterSwitchChannel() {
                             // TODO Auto-generated method stub
+                            Log.d(TAG, "onGainAfterSwitchChannel: ");
 
                         }
 
                         @Override
                         public void onGainBeforeSwitchChannel() {
                             // TODO Auto-generated method stub
+                            Log.d(TAG, "onGainBeforeSwitchChannel: ");
 
                         }
 
                         @Override
                         public void onLossAfterSwitchChannel() {
                             // TODO Auto-generated method stub
+                            Log.d(TAG, "onLossAfterSwitchChannel: ");
 
                         }
 
                         @Override
                         public void onLossBeforeSwitchChannel() {
                             // TODO Auto-generated method stub
-
+                            Log.d(TAG, "onLossBeforeSwitchChannel: ");
                         }
 
                         @Override
                         public void onLossTransientAfterSwitchChannel() {
                             // TODO Auto-generated method stub
-
+                            Log.d(TAG, "onLossTransientAfterSwitchChannel: ");
                         }
 
                         @Override
                         public void onLossTransientBeforeSwitchChannel() {
                             // TODO Auto-generated method stub
-
+                            Log.d(TAG, "onLossTransientBeforeSwitchChannel: ");
                         }
 
                         @Override
                         public void onLossTransientCanDuckAfterSwitchChannel() {
                             // TODO Auto-generated method stub
-
+                            Log.d(TAG, "onLossTransientCanDuckAfterSwitchChannel: ");
                         }
 
                         @Override
                         public void onLossTransientCanDuckBeforeSwitchChannel() {
                             // TODO Auto-generated method stub
-
+                            Log.d(TAG, "onLossTransientCanDuckBeforeSwitchChannel: ");
                         }
                     }, CallService.this);
 
@@ -815,11 +772,7 @@ public class CallService extends Service {
                     if (mSrcMngAudioSwitchProxy.requestAdayoAudioFocus(6, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)) {//经江文尧工确认，换成混音AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
                         audioFocus = true;
                         Log.i(TAG, "------------------------------------------申请焦点成功-----AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------------");
-                        try {
-                            mCommand.startHfpRender();
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
+                        setParms(true,state);
                     } else {
                         audioFocus = false;
                         Log.i(TAG, "------------------------------------------申请焦点失败-----------AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------");
@@ -832,6 +785,39 @@ public class CallService extends Service {
         }.start();
 
     }
+private  boolean muteSwitch = false;
+    private void setParms(boolean isFocus,int state){
+        SettingExternalManager settingsManager = SettingExternalManager.getSettingsManager();
+        boolean muteSwitch = settingsManager.getMuteSwitch();
+        Log.d(TAG, "setParms: isFocus="+isFocus +"--state--"+state);
+        if(isFocus){
+            try {
+                if(state != NfHfpClientCall.CALL_STATE_INCOMING){
+                    mCommand.startHfpRender();
+                }
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            this.muteSwitch = muteSwitch;
+            if(muteSwitch){
+                settingsManager.setMuteSwitch(false);
+            }
+        }else {
+            try {
+                mCommand.pauseHfpRender();
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            if(this.muteSwitch){
+                Log.d(TAG, "setParms: 电话之前是静音，挂断后设置为静音");
+                settingsManager.setMuteSwitch(true);
+            }
+
+        }
+    }
+
 
 }
 

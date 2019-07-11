@@ -3,6 +3,8 @@ package com.nforetek.bt.phone.tools;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -45,6 +47,18 @@ public class ConfirmDialog extends Dialog {
     }
 
     public void init() {
+        Window window = this.getWindow();
+        window.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+        WindowManager.LayoutParams lp = window.getAttributes();
+        window.requestFeature(Window.FEATURE_NO_TITLE);
+        // 全屏
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+        // 背景透明
+        window.setBackgroundDrawable(
+                new ColorDrawable(Color.TRANSPARENT));
+        lp.x = 360;
+        window.setAttributes(lp);
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(com.nforetek.bt.phone.R.layout.alertdialog_layout, null);
         setContentView(view);
@@ -58,15 +72,15 @@ public class ConfirmDialog extends Dialog {
         alert_bt_disconnect.setOnClickListener(new clickListener());
         alert_bt_cancel.setOnClickListener(new clickListener());
 
-        Window dialogWindow = getWindow();
-        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-        lp.width = 640;
-        lp.height = 330;
-        lp.x = 360;
-        lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
-//        lp.y = 50;
-//        lp.gravity = Gravity.CENTER;
-        dialogWindow.setAttributes(lp);
+//        Window dialogWindow = getWindow();
+//        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+//        lp.width = 640;
+//        lp.height = 330;
+//        lp.x = 360;
+//        lp.gravity = Gravity.CENTER_VERTICAL | Gravity.START;
+////        lp.y = 50;
+////        lp.gravity = Gravity.CENTER;
+//        dialogWindow.setAttributes(lp);
     }
 
     public void setClicklistener(ClickListenerInterface clickListenerInterface) {

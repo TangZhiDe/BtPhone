@@ -342,7 +342,7 @@ public class WindowDialog implements View.OnClickListener{
 
 
 
-    private static String TAG = WindowDialog.class.getCanonicalName();
+    private static String TAG = WindowDialog.class.getCanonicalName()+MyApplication.Verson;
     public void show() {
         Log.d(TAG, "------------show---------------"+mIsShow);
         if (!mIsShow  ) {

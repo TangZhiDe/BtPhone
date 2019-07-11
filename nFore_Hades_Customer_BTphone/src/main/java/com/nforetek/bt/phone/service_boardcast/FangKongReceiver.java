@@ -3,27 +3,15 @@ package com.nforetek.bt.phone.service_boardcast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.adayo.adayosource.AdayoSource;
-import com.adayo.proxy.sourcemngproxy.Beans.AppConfigType;
-import com.adayo.proxy.sourcemngproxy.Beans.SourceInfo;
-import com.adayo.proxy.sourcemngproxy.Control.SrcMngSwitchProxy;
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.phone.MyApplication;
-import com.nforetek.bt.phone.R;
-import com.nforetek.bt.phone.tools.ActivityStartAnimHelper;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.res.NfDef;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static com.adayo.proxy.share.utils.ContextUtil.getContext;
-import static com.adayo.proxy.sourcemngproxy.Beans.AppConfigType.SourceType.UI_AUDIO;
 
 
 public class FangKongReceiver extends BroadcastReceiver {
@@ -80,6 +68,12 @@ public class FangKongReceiver extends BroadcastReceiver {
 
             }
 
+        }else if(intent.getAction().equals("com.adayo.setting.configChange")){
+            boolean topAppPackageName = CallInterfaceManagement.getTopAppPackageName(context);
+            Log.d(TAG, "onReceive: 收到广播昼夜 中英文切换  topAppPackageName =="+topAppPackageName);
+            if(!topAppPackageName){
+                MyApplication.finishApp();
+            }
         }
     }
 }

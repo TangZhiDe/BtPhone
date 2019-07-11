@@ -55,6 +55,7 @@ import com.nforetek.bt.phone.adapter.SortAdapter;
 import com.nforetek.bt.phone.presenter.BtPresenter;
 import com.nforetek.bt.phone.pvcontract.IBtContract;
 import com.nforetek.bt.phone.service_boardcast.CallService;
+import com.nforetek.bt.phone.tools.ActivityStartAnimHelper;
 import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.ConfirmDialog;
@@ -62,16 +63,19 @@ import com.nforetek.bt.phone.tools.MyLinearLayoutManager;
 import com.nforetek.bt.phone.tools.WindowDialog;
 import com.nforetek.bt.res.NfDef;
 
+import static com.adayo.proxy.share.utils.ContextUtil.getContext;
+import static com.adayo.proxy.sourcemngproxy.Beans.AppConfigType.SourceType.UI_AUDIO;
+
 
 /**
  * @author tzd
  */
 public class BtPhoneMainActivity extends BaseActivity implements View.OnClickListener, View.OnLongClickListener,
         BtPresenter.UiBluetoothServiceConnectedListener,
-        BtPresenter.UiBluetoothPhoneChangeListerer,
         BtPresenter.UiBluetoothSettingChangeListerer, IBtContract {
 
-    private static final String TAG = BtPhoneMainActivity.class.getCanonicalName();
+
+    private static final String TAG = BtPhoneMainActivity.class.getCanonicalName()+MyApplication.Verson;
     private BtPresenter mBPresenter;
     private ContactFragment contactFragment;
     private RecordsFragment recordsFragment;
@@ -173,6 +177,12 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: ");
@@ -185,7 +195,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 myHandler.sendEmptyMessage(0x02);
             }
         }
-
         isopen();
     }
 
@@ -284,12 +293,13 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                     }
 
                 } else {
-//                    main_fragment.setVisibility(View.VISIBLE);
-                    main_fit.setVisibility(View.GONE);
-                    main_fit.setAnimation(BtUtils.makeOutAnimation(BtPhoneMainActivity.this, false));
-                    phone_num.setCursorVisible(false);
-                    isPageShow = false;
-                    phoneTextCursor = false;
+                    if(isPageShow){
+                        main_fit.setVisibility(View.GONE);
+                        main_fit.setAnimation(BtUtils.makeOutAnimation(BtPhoneMainActivity.this, false));
+                        phone_num.setCursorVisible(false);
+                        isPageShow = false;
+                        phoneTextCursor = false;
+                    }
                 }
             }
         });
@@ -374,8 +384,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         public boolean handleMessage(Message message) {
             switch (message.what) {
                 case 0x00:
-                    input_number ="";
-                    phone_num.setText("");
                     Bundle data = message.getData();
                     boolean isConnected = data.getBoolean("isConnected");
                     MyApplication.connectAddress = data.getString("address");
@@ -383,9 +391,13 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                     Log.d(TAG, "handleMessage: btConnect==" + isConnected);
                     btConnect(isConnected);
                     if (isConnected) {
-                        if (name.isEmpty())
+                        if (TextUtils.isEmpty(name))
                             name = "名称未设置";
                         main_device_name.setText(name);
+                    }else {
+                        stopRotate();
+                        input_number ="";
+                        phone_num.setText("");
                     }
                     break;
                 case 0x01:
@@ -437,49 +449,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         ico_loading.clearAnimation();
     }
 
-    @Override
-    public void onHfpCallChanged(String address, NfHfpClientCall call) {
 
-    }
-
-    @Override
-    public void onHfpCallingTimeChanged(String time) {
-
-    }
-
-    @Override
-    public void onPbapStateChanged(int sycnState) {
-        Log.d(TAG, "onPbapStateChanged: sycnState===" + sycnState);
-//        switch (sycnState) {
-//            case NforeBtBaseJar.BT_SYNC_CONTACT:
-//                //开始同步
-//                myHandler.sendEmptyMessage(0x02);
-//                break;
-//            case NforeBtBaseJar.BT_SYNC_COMPLETE_CALLLOGS:
-//                //通话记录下载完成
-//                Log.d(TAG, "onPbapStateChanged: 下载完成");
-//                myHandler.sendEmptyMessage(0x01);
-//                break;
-//            case NforeBtBaseJar.BT_SYNC_COMPLETE_CONTACT:
-//                //通讯录下载完成
-//                try {
-//                    if (MyApplication.connectAddress == "") {
-//                        MyApplication.connectAddress = mBPresenter.getHfpConnectedAddress();
-//                    }
-//
-//                    mBPresenter.reqPbapDownload(MyApplication.connectAddress, NfDef.PBAP_STORAGE_CALL_LOGS, mProperty);
-//                    Log.d(TAG, "onPbapStateChanged: 开始下载通话记录" + MyApplication.connectAddress);
-//                } catch (RemoteException e) {
-//                    e.printStackTrace();
-//                }
-//                break;
-//            case NforeBtBaseJar.BT_SYNC_INTERRUPTED:
-//                //同步失败
-//                Log.d(TAG, "onPbapStateChanged: 同步失败");
-//                myHandler.sendEmptyMessage(0x01);
-//                break;
-//        }
-    }
 
     private static class SpaceItemDecoration extends RecyclerView.ItemDecoration {
         private int space;
@@ -507,7 +477,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         if (mBPresenter != null) {
             mBPresenter.registerUiBluetoothServiceConnectedListener(this);
             mBPresenter.registerUiBluetoothSettingChangeListerer(this);
-            mBPresenter.registerUiBluetoothPhoneChangeListerer(this);
             mBPresenter.setContactFragment(contactFragment);
             mBPresenter.setRecordsFragment(recordsFragment);
             mBPresenter.registerView(this);
@@ -583,18 +552,11 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         LogUtils.iL(TAG, "onCreate");
-//		WindowManager.LayoutParams params = getWindow().getAttributes();
-//		params.y = 60;
-//		params.gravity = Gravity.LEFT;
-//		params.width = 1920;
-//		params.height = 1020;
-//		getWindow().setAttributes(params);
         btPhoneMainActivity = this;
         if(MyApplication.mBPresenter != null){
             MyApplication.mBPresenter.setBtPhoneMainActivity(this);
         }
         main_tabs = findViewById(R.id.main_tabs);
-//        RadioButton childAt = (RadioButton) main_tabs.getChildAt(0);
         tab_records = findViewById(R.id.tab_records);
         tab_contact = findViewById(R.id.tab_contact);
         main_tabs.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -645,8 +607,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         super.onStop();
         phone_num.clearFocus();
         Log.d(TAG, "onStop");
-//        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-//        management.showCallInterface(BtPhoneMainActivity.this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
     }
 
     @Override
@@ -808,11 +768,20 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //                newAct.putExtra("flag",1);
 //                newAct.setComponent(new ComponentName("com.adayo.app.settings", "com.adayo.app.settings.ui.activity.SettingsMainActivity"));
 //                startActivity(newAct);
+//                SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
+//                Map<String, String> map = new HashMap<>();
+//                map.put("bt", "ConnectBt");
+//                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING, map,
+//                        AppConfigType.SourceSwitch.APP_ON.getValue(), AppConfigType.SourceType.UI.getValue());
+//                srcMngSwitchProxy.onRequest(info);
+
                 SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
-                Map<String, String> map = new HashMap<>();
+                HashMap<String, String> map = new HashMap<>();
                 map.put("bt", "ConnectBt");
-                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING, map,
-                        AppConfigType.SourceSwitch.APP_ON.getValue(), AppConfigType.SourceType.UI.getValue());
+                Bundle bundle =ActivityStartAnimHelper.addTransAnimParam(getContext(),R.anim.exit_anim,map);
+                int value = AppConfigType.SourceSwitch.APP_ON.getValue();
+                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING,null,map,
+                        value,  UI_AUDIO.getValue(),bundle);
                 srcMngSwitchProxy.onRequest(info);
                 Log.d(TAG, "onClick: 通过源管理跳转到setting蓝牙界面");
                 break;
@@ -918,7 +887,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             return;
         Message message = myHandler.obtainMessage(0x00);
         try {
-            String btRemoteDeviceName1 = mBPresenter.getBtRemoteDeviceName(address);
             Bundle bundle = new Bundle();
             boolean isConnected = false;
             if (connectState == NforeBtBaseJar.CONNECT_DISCONNECT) {
@@ -928,8 +896,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 //蓝牙断开关闭动画
 //				main_content.setVisibility(View.VISIBLE);
 //				empty_loading.setVisibility(View.GONE);
-                stopRotate();
+
             } else if (connectState == NforeBtBaseJar.CONNECT_SUCCESSED) {
+                String btRemoteDeviceName1 = mBPresenter.getBtRemoteDeviceName(address);
                 bundle.putString("name", btRemoteDeviceName1);
                 bundle.putString("address", address);
                 btRemoteDeviceName = btRemoteDeviceName1;
@@ -993,12 +962,11 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             if (mBPresenter == null) {
 
             } else {
-                Log.d(TAG, "============!mCommand.isHfpConnected()=============mBPresenter.isBtEnabled() ===== " + mBPresenter.isBtEnabled() + "========mBPresenter.isHfpConnected()==+" + mBPresenter.isHfpConnected());
-                if (!mBPresenter.isBtEnabled() || !mBPresenter.isHfpConnected()) {
-
+                Log.d(TAG, "============!mCommand.isHfpConnected()========= "  + mBPresenter.isHfpConnected());
+                if (!mBPresenter.isHfpConnected()) {
                     btConnect(false);
                     Log.d(TAG, "============!mCommand.isHfpConnected()================== ");
-                } else if (mBPresenter.isHfpConnected()) {
+                } else  {
                     Message message = myHandler.obtainMessage(0x00);
                     try {
                         String address = mBPresenter.getHfpConnectedAddress();

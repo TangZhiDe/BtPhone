@@ -94,6 +94,9 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
         }
     }
 
+
+
+
     @Override
     public int getItemCount() {
         return mData.size();
@@ -115,6 +118,10 @@ public class SortAdapter extends RecyclerView.Adapter<SortAdapter.ViewHolder> {
         this.changeStr = textStr;
 //        notifyDataSetChanged();
 
+    }
+
+    public void setContactsList(List<Contacts> mData){
+        this.mData = mData;
     }
 
 

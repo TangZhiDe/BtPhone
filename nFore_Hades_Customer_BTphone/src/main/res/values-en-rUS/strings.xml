@@ -8,6 +8,8 @@
     <string name="str_sev_package">com.nforetek.bt.customer.service</string>
     <!-- service action -->
     <string name="str_sev_action">com.nforetek.bt.CUSTOMER_SERVICE</string>
+    <string name="description">service_permission</string>
+    <string name="label">personprovider_permission_service_permission</string>
     <string name="string1">Please use it after connecting to the device</string>
     <string name="string2">Connect</string>
     <string name="string3">Records</string>

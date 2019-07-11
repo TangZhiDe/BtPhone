@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.adayo.app.utils.LogUtils;
+import com.adayo.proxy.settings.SettingExternalManager;
 import com.adayo.proxy.share.ShareDataManager;
 import com.adayo.proxy.share.interfaces.IShareDataListener;
 import com.nforetek.bt.phone.MyApplication;
@@ -24,6 +25,7 @@ public class ShareInfoUtils {
     private static final int backCarStateID = 16;//倒车
     private static final int srcID = 14;//源管理
     private static final int iCallID = 52;//源管理call_state
+    private static final int voiceID = 7;//源管理call_state  mute_switch
     private static ShareDataManager mShareDataManager = ShareDataManager.getShareDataManager();
     /**
      * 从shareInfo中读取设置项
@@ -55,17 +57,20 @@ public class ShareInfoUtils {
                 boolean backCarState = jsonObject.getBoolean("backCarState");
                 Log.d("parseSkinInfo", "backCarState = "+backCarState+"  context="+context);
                 CallService.backCarState = backCarState;
-                if(backCarState){
-                    //在倒车 隐藏弹窗
-                    WindowDialog instance = WindowDialog.getInstance();
-                    if(instance != null && instance.mIsShow){
-                        instance.dismiss();
+                if(context != null){
+                    if(backCarState){
+                        //在倒车 隐藏弹窗
+
+                        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_HIDE);
+
+                    }else {
+                        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
                     }
                 }
-                if(!backCarState && context != null){
-                    CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                    management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
-                }
+
+
             }
 
         }catch (JSONException e){
@@ -113,6 +118,21 @@ public class ShareInfoUtils {
             e.printStackTrace();
         }
     }
+    public  static void parseSkinInfo3(String s) {
+        try {
+            JSONObject jsonObject = new JSONObject(s);
+            if(jsonObject.has("mute_switch")){
+                boolean mute_switch = jsonObject.getBoolean("mute_switch");
+                Log.d("parseSkinInfo", "mute_switch = "+mute_switch);
+                if(mute_switch){
+
+                }
+            }
+
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
 
 
     public static IShareDataListener shareDataListener = new IShareDataListener(){
@@ -127,6 +147,9 @@ public class ShareInfoUtils {
             }
             if (dataType == iCallID){
                 parseSkinInfo2(s);
+            }
+            if (dataType == voiceID){
+                parseSkinInfo3(s);
             }
         }
     };

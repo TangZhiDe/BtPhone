@@ -2,12 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="640px"
-
     android:background="@drawable/popup_bg"
-    android:layout_height="330px">
+    android:layout_height="340px">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="227px">
+        android:layout_height="237px">
 
         <RelativeLayout
             android:layout_width="450px"
@@ -47,22 +46,22 @@
 
         </RelativeLayout>
     </RelativeLayout>
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:background="#ccc"-->
-        <!--android:layout_height="1dp"/>-->
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
+        android:layout_height="2dp"/>
+    <LinearLayout
+        android:layout_width="640px"
         android:orientation="horizontal"
-        android:layout_height="match_parent">
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_height="101px">
         <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="319px"
             android:text="@string/string10"
             android:textSize="28px"
-            android:background="@null"
+            android:background="@drawable/selector_comfir"
             android:id="@+id/alert_bt_disconnect"
-            android:textColor="@drawable/select_dialog_btn"
+            android:textColor="@color/tab_selected"
             android:gravity="center"
             android:layout_height="match_parent" />
         <!--<View-->
@@ -72,12 +71,12 @@
             <!--android:layout_height="match_parent"-->
             <!--android:layout_marginTop="10px"/>-->
         <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="319px"
             android:text="@string/string11"
             android:id="@+id/alert_bt_cancel"
+            android:background="@drawable/selector_comfir_right"
+            android:textColor="@color/btcolor9"
             android:textSize="28px"
-            android:textColor="@drawable/select_dialog_btn"
             android:gravity="center"
             android:layout_height="match_parent" />
     </LinearLayout>

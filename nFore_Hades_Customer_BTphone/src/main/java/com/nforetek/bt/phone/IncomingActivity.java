@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.phone.presenter.BtPresenter;
+import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.GetInfoFormContacts;
 import com.nforetek.bt.phone.tools.WindowDialog;
@@ -23,7 +24,7 @@ import java.util.List;
 
 
 public class IncomingActivity extends Activity {
-
+    private static String TAG = "IncomingActivity"+MyApplication.Verson;
     private String callName;
     public static IncomingActivity bTphoneCallActivity;
     private String callNumber;
@@ -39,39 +40,52 @@ public class IncomingActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        getWindow().setStatusBarColor(Color.WHITE);
-        //设置状态栏图标为深色
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        getWindow().setStatusBarColor(Color.WHITE);
+//        //设置状态栏图标为深色
+//        getWindow().getDecorView().setSystemUiVisibility(
+//                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(R.layout.activity_incoming);
-//        WindowManager.LayoutParams params = getWindow().getAttributes();
-//        params.y = 60;
-//        params.gravity = Gravity.LEFT;
-//        params.width = 1920;
-//        params.height = 1020;
-//        getWindow().setAttributes(params);
         mBPresenter = MyApplication.mBPresenter;
         bTphoneCallActivity = this;
         init();
-//        autoAnswer();
+        Log.d(TAG, "onCreate: ");
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: ");
+    }
+
+
+    @Override
     protected void onNewIntent(Intent intent) {
-        Log.d("IncomingActivity", "onNewIntent: ");
+        Log.d(TAG, "onNewIntent: ");
         super.onNewIntent(intent);
         setIntent(intent);
         if (intent != null) {
-            Log.d("IncomingActivity", "onNewIntent: +++++++++++++++++++++++++++++++");
+            Log.d(TAG, "onNewIntent: +++++++++++++++++++++++++++++++");
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
         bTphoneCallActivity = null;
     }
 
@@ -114,7 +128,6 @@ public class IncomingActivity extends Activity {
 
 
         incoming_num.setText(callNumber);
-
         incoming_showDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,7 +148,7 @@ public class IncomingActivity extends Activity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-                finish();
+                BtUtils.finish(IncomingActivity.this);
             }
         });
         incoming_answer.setOnClickListener(new View.OnClickListener() {
@@ -145,13 +158,6 @@ public class IncomingActivity extends Activity {
                     if(mBPresenter != null && mBPresenter.isHfpConnected()){
                         if(callNumber!=null){
                             mBPresenter.reqHfpAnswerCall(NfDef.CALL_ACCEPT_NONE);
-//                            Intent intent1 = new Intent();
-//                            intent1.setClass(IncomingActivity.this,CallingActivity.class);
-//                            intent1.putExtra("name",callName);
-//                            intent1.putExtra("number",callNumber);
-//                            intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                            startActivity(intent1);
-//                            finish();
                         }
                     }
                 } catch (RemoteException e) {

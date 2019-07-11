@@ -39,7 +39,7 @@ public class BtPresenter implements
         BluetoothSppChangeListener {
 
     //	private final static BtPresenter INSTANCE = new BtPresenter();
-    private static final String TAG = BtPresenter.class.getCanonicalName();
+    private static final String TAG = BtPresenter.class.getCanonicalName()+MyApplication.Verson;
     public static List<Contacts> contactsList = null;
     public static List<CallLogs> callLogsList = null;
     private ContactFragment contactFragment;
@@ -84,6 +84,12 @@ public class BtPresenter implements
     }
 
     public BtPhoneMainActivity getBtPhoneMainActivity() {
+        if(btPhoneMainActivity == null){
+            return null;
+        }
+        if(btPhoneMainActivity.isFinishing()){
+            return null;
+        }
         return btPhoneMainActivity;
     }
 
@@ -138,6 +144,12 @@ public class BtPresenter implements
     }
 
     public CallingActivity getCallingActivity() {
+        if(callingActivity == null){
+            return null;
+        }
+        if(callingActivity.isFinishing()){
+            return null;
+        }
         return callingActivity;
     }
 
@@ -1914,7 +1926,7 @@ public class BtPresenter implements
     public void onPbapStateChanged(int sycnState) {
         Log.i(TAG, "onPbapStateChanged sycnState---" + sycnState);
         BtPhoneMainActivity mainActivity = getBtPhoneMainActivity();
-        if (mainActivity != null) {
+        if (mainActivity != null ) {
             switch (sycnState) {
                 case NforeBtBaseJar.BT_SYNC_CONTACT:
                     //开始同步联系人
@@ -1987,24 +1999,24 @@ public class BtPresenter implements
     @Override
     public void onHfpStateChanged(String address, int connectState) {
         Log.i(TAG, "onHfpStateChanged");
-        if (getCallingActivity() != null) {
-            if (connectState == NforeBtBaseJar.CONNECT_SUCCESSED)   //连接状态
-            {
-                Log.i(TAG, "-----------------onHfpStateChanged-------------isConnected--------" + true);
-
-            } else if (connectState == NforeBtBaseJar.CONNECT_DISCONNECT) {
-                Log.i(TAG, "-----------------onHfpStateChanged--------------isConnected-------" + false);
-                getCallingActivity().finish();
-            }
-
-        }
-        if (getWindowDialog() != null) {
-            if (connectState == NforeBtBaseJar.CONNECT_DISCONNECT) {
-                Log.d(TAG, "onHfpStateChanged: 蓝牙断开");
-                getWindowDialog().initInstance();
-
-            }
-        }
+//        if (getCallingActivity() != null) {
+//            if (connectState == NforeBtBaseJar.CONNECT_SUCCESSED)   //连接状态
+//            {
+//                Log.i(TAG, "-----------------onHfpStateChanged-------------isConnected--------" + true);
+//
+//            } else if (connectState == NforeBtBaseJar.CONNECT_DISCONNECT) {
+//                Log.i(TAG, "-----------------onHfpStateChanged--------------isConnected-------" + false);
+//                getCallingActivity().finish();
+//            }
+//
+//        }
+//        if (getWindowDialog() != null) {
+//            if (connectState == NforeBtBaseJar.CONNECT_DISCONNECT) {
+//                Log.d(TAG, "onHfpStateChanged: 蓝牙断开");
+//                getWindowDialog().initInstance();
+//
+//            }
+//        }
 
         if (mSettingChangeListener == null) {
             return;
@@ -2020,18 +2032,18 @@ public class BtPresenter implements
     public void onHfpAudioStateChanged(String address, int prevState,
                                        int newState) {
         Log.i(TAG, "onHfpAudioStateChanged");
-        if (getCallingActivity() != null) {
-            Message msg = new Message();
-            msg.what = 0;
-            msg.arg1 = newState;
-            getCallingActivity().myHandler.sendMessage(msg);
-        }
-        if (getWindowDialog() != null) {
-            Message msg = new Message();
-            msg.what = 0;
-            msg.arg1 = newState;
-            getWindowDialog().mHandler.sendMessage(msg);
-        }
+//        if (getCallingActivity() != null) {
+//            Message msg = new Message();
+//            msg.what = 0;
+//            msg.arg1 = newState;
+//            getCallingActivity().myHandler.sendMessage(msg);
+//        }
+//        if (getWindowDialog() != null) {
+//            Message msg = new Message();
+//            msg.what = 0;
+//            msg.arg1 = newState;
+//            getWindowDialog().mHandler.sendMessage(msg);
+//        }
         if (mSettingChangeListener == null) {
             return;
         }
@@ -2120,6 +2132,7 @@ public class BtPresenter implements
     @Override
     public void onMainDevicesChanged(String address, String name) {
         Log.d(TAG, "onMainDevicesChanged: address---" + address + "----name---" + name);
+//            getData();
 			if (getContactFragment() != null) {
 				getContactFragment().getList();
 			}

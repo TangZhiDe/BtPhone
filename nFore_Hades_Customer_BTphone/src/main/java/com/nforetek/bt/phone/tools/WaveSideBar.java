@@ -32,6 +32,7 @@ public class WaveSideBar extends View {
             "W", "X", "Y", "Z", "#" };
     private Paint mPaint;
     private int mTextColor;
+    private int mSelectColor;
 
     private int mChoose = -1;
     private int mChoose1 = -1;
@@ -61,6 +62,7 @@ public class WaveSideBar extends View {
         super(context, attrs, defStyleAttr);
         this.mPaint = new Paint();
         this.mTextColor = getResources().getColor(R.color.btcolor13);
+        this.mSelectColor = getResources().getColor(R.color.tab_selected);
         this.mPaint.setAntiAlias(true);
         this.mPaint.setTextAlign(Paint.Align.CENTER);
         this.mPaint.setColor(this.mTextColor);
@@ -130,6 +132,8 @@ public class WaveSideBar extends View {
 //                            mOnTouchingLetterChangedListener.onTouchingLetterChanged(mLetters[characterIndex]);
                         }
                     }
+                    //移动时，将上一次高亮的字体不高亮
+                    this.mSelectColor = this.mTextColor;
                     invalidate();
                 }
                 break;
@@ -155,6 +159,8 @@ public class WaveSideBar extends View {
 
                 mChoose = -1;
                 mAnimStep = 0f;
+                //选中的字体高亮
+                this.mSelectColor = getResources().getColor(R.color.tab_selected);
                 invalidate();
                 return false;
         }
@@ -203,7 +209,7 @@ public class WaveSideBar extends View {
             canvas.scale(diff, diff, mHalfWidth * 1.20f + diffX, letterPosY + diffY);
             if (diff == 1f) {
                 if(mChoose1 == i){
-                    this.mPaint.setColor(getResources().getColor(R.color.tab_selected));
+                    this.mPaint.setColor(this.mSelectColor);
                 }else {
                     this.mPaint.setColor(this.mTextColor);
                 }

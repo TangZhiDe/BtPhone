@@ -10,9 +10,8 @@
     <color name="fafbfc">#121924</color>
 
 
-
     <color name="device_name">#008bff</color>
-    <color name="tab_normal">#868686</color>
+    <color name="tab_normal">#656b77</color>
     <color name="tab_selected">#008bff</color>
     <color name="btcolor1">#5a5d62</color>
     <color name="btcolor2">#fff</color>

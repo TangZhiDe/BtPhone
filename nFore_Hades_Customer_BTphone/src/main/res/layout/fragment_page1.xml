@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:background="@color/fafbfc"
+	android:background="@drawable/bt_list_bg"
 	android:layout_height="match_parent">
 
 	<LinearLayout
@@ -25,7 +25,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginLeft="15px"
 				android:textSize="24px"
-				android:textColor="@color/btcolor12"
+				android:textColor="@color/selector_sync"
 				android:text="@string/string7"/>
 		</LinearLayout>
 		<RelativeLayout

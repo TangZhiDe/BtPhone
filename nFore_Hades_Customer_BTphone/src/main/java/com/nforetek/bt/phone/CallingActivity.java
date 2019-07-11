@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.phone.presenter.BtPresenter;
+import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.GetInfoFormContacts;
 import com.nforetek.bt.res.NfDef;
@@ -32,7 +33,7 @@ import java.util.List;
 public class CallingActivity extends Activity implements View.OnClickListener, View.OnLongClickListener{
     //,
     //        BtPresenter.UiBluetoothSettingChangeListerer, BtPresenter.UiBluetoothPhoneChangeListerer
-    private static String TAG = CallingActivity.class.getCanonicalName();
+    private static String TAG = CallingActivity.class.getCanonicalName()+MyApplication.Verson;
     private BtPresenter mBPresenter;
     private RelativeLayout one, two, three, four, five, six, seven, eight, nine, zero, asterisk, pound;
     private EditText phone_num;
@@ -51,19 +52,19 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     private TextView calling_num;
     private TextView calling_firName;
     private ImageView calling_img_bg;
+    public static CallingActivity callingActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        getWindow().setStatusBarColor(Color.WHITE);
-        //设置状态栏图标为深色
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        getWindow().setStatusBarColor(Color.WHITE);
+//        //设置状态栏图标为深色
+//        getWindow().getDecorView().setSystemUiVisibility(
+//                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(R.layout.activity_calling);
-        MyApplication.callingActivity = this;
-
+        callingActivity = this;
         mBPresenter = MyApplication.mBPresenter;
         if(mBPresenter != null){
             mBPresenter.setCallingActivity(this);
@@ -84,6 +85,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: ");
         if (mBPresenter != null) {
             if (MyApplication.isKeyboardShow) {
                 calling_info.setVisibility(View.GONE);
@@ -279,7 +281,8 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                                 break;
                                 case 0: {//如果通话结束
                                     Log.d(TAG, "run: ==================list为0 finish==================");
-                                    finish();
+                                    BtUtils.finish(CallingActivity.this);
+
                                 }
 
                             }
@@ -522,15 +525,26 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
         return false;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: ");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
-        if(mBPresenter != null){
-            mBPresenter.setCallingActivity(null);
-        }
-        MyApplication.callingActivity = null;
+//        if(mBPresenter != null){
+//            mBPresenter.setCallingActivity(null);
+//        }
+//        callingActivity = null;
 
     }
 

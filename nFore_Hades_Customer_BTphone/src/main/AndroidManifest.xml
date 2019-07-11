@@ -4,7 +4,15 @@
     android:sharedUserId="android.uid.system"
     android:versionCode="1"
     android:versionName="1.0">
-
+    <!--<permission-->
+        <!--android:name="com.nforetek.bt.phone.service_OWN"-->
+        <!--android:description="@string/description"-->
+        <!--android:icon="@drawable/ic_launcher"-->
+        <!--android:label="@string/label"-->
+        <!--android:protectionLevel="normal"/>-->
+    <permission
+        android:name="app.custom.permission"
+        android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="app.custom.permission" />
@@ -44,16 +52,17 @@
         <!--android:launchMode="singleInstance" android:configChanges="locale|uiMode"-->
         <activity
             android:name=".IncomingActivity"
+            android:theme="@style/MainTheme"
             />
 
         <service
-            android:name=".service_boardcast.CallService"
+            android:name="com.nforetek.bt.phone.service_boardcast.CallService"
             android:exported="true"
             android:enabled="true"
+            android:directBootAware="true"
             android:permission="app.custom.permission" >
             <intent-filter>
-                <action android:name="com.nforetek.bt.phone.callService" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.nforetek.bt.phone.callService"/>
             </intent-filter>
         </service>
 <!--android:priority="2147483647"-->
@@ -74,6 +83,7 @@
         <!--</receiver>-->
 <!--android:configChanges="locale|uiMode"-->
         <activity android:name=".CallingActivity"
+            android:theme="@style/MainTheme"
             >
         </activity>
     </application>

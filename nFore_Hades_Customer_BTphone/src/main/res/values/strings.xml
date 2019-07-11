@@ -8,6 +8,8 @@
     <string name="str_sev_package">com.nforetek.bt.customer.service</string>
     <!-- service action -->
     <string name="str_sev_action">com.nforetek.bt.CUSTOMER_SERVICE</string>
+    <string name="description">service_permission</string>
+    <string name="label">personprovider_permission_service_permission</string>
     <string name="string1">请在连接设备后使用</string>
     <string name="string2">连接设备</string>
     <string name="string3">通话记录</string>

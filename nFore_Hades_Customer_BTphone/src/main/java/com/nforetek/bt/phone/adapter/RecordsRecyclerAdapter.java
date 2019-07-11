@@ -128,6 +128,10 @@ public class RecordsRecyclerAdapter extends RecyclerView.Adapter<RecordsRecycler
         }
     }
 
+    public void setRecordsList(List<CallLogs> list){
+        this.list = list;
+    }
+
     /**
      *	时间格式转换
      */

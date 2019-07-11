@@ -12,14 +12,10 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         //后边的XXX.class就是要启动的服务
         Log.v("TAG", "开机自动服务自动启动.....");
-//        service.setPackage("com.nforetek.bt.phone");
         Intent service = new Intent();
         service.setAction("com.nforetek.bt.phone.callService");
         service.setPackage(context.getPackageName());
         context.startService(service);
-        //        ComponentName componentName = new ComponentName(context, CallService.class);
-//        service.setComponent(componentName);
         Log.v("TAG", "开机自动服务自动启动111.....");
-
     }
 }
