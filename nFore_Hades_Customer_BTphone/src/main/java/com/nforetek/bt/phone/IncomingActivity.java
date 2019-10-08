@@ -35,6 +35,7 @@ public class IncomingActivity extends Activity {
     private TextView incoming_num;
     private TextView calling_firName;
     private ImageView calling_img_bg;
+    private boolean isMove = false;//是否需要将蓝牙电话移动到后台
 
 
     @Override
@@ -56,6 +57,7 @@ public class IncomingActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        isMove = false;
         Log.d(TAG, "onStart: ");
     }
 
@@ -87,6 +89,9 @@ public class IncomingActivity extends Activity {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
         bTphoneCallActivity = null;
+//        if(isMove){
+//            moveTaskToBack(true);
+//        }
     }
 
     private void init() {
@@ -134,6 +139,8 @@ public class IncomingActivity extends Activity {
 //                moveTaskToBack(true);
 //                WindowDialog instance = WindowDialog.getInstance(getApplication());
 //                instance.show();
+                isMove = true;
+                BtUtils.finish(IncomingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(IncomingActivity.this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
             }

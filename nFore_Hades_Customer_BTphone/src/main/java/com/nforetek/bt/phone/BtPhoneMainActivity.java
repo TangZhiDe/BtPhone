@@ -110,9 +110,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     private RadioGroup main_tabs;
     private RadioButton tab_records;
     private RadioButton tab_contact;
-
     private boolean isPageShow = false;//搜索匹配联系人页面是否显示
-
     /**
      * 获取该 Activity 布局控件 ID。
      */

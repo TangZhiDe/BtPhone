@@ -2,7 +2,6 @@ package com.nforetek.bt.phone.tools;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -47,9 +46,9 @@ public class CallInterfaceManagement {
     public final static int SHOW_TYPE_OUT = 3;//去电
     public final static int SHOW_TYPE_YUAN = 4;//显示弹窗
     public final static int SHOW_TYPE_HIDE = 5;//隐藏
+    public final static int SHOW_TYPE_TURN_CALL = 6;//隐藏
     private static CallInterfaceManagement mModel;
     private Context context;
-
     private BtPresenter btPresenter;
     public static CallInterfaceManagement getCallInterfaceManagementInstance() {
         if (mModel == null) {
@@ -126,20 +125,37 @@ public class CallInterfaceManagement {
                     }
                     break;
                 case SHOW_TYPE_DIALOG:
+//                    ((Activity)context).finish();
                     ((Activity)context).moveTaskToBack(true);
-//                    catSource(false);
-                    myHandler.sendEmptyMessage(0);
+                    catSource(false);
+//                    myHandler.sendEmptyMessage(0);
                     break;
                 case SHOW_TYPE_YUAN:
                     if(!getTopAppPackageName(context)){
                         myHandler.sendEmptyMessage(0);
+
                     }
                     break;
                 case SHOW_TYPE_Activity:
-//                    WindowDialog instance = WindowDialog.getInstance();
-//                    if(instance != null){
-//                        instance.dismiss();
+                    catSource(true);
+//                    WindowDialog.initInstance();
+//                    List<NfHfpClientCall> hfpCallList = null;
+//                    try {
+//                        hfpCallList = btPresenter.getHfpCallList();
+//                        if(hfpCallList != null && hfpCallList.size()>0){
+//                            NfHfpClientCall call = hfpCallList.get(0);
+//                            if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
+//                                setTopApp(true,context);
+//                            }else {
+//                                setTopApp(false,context);
+//                            }
+//                        }
+//
+//                    } catch (RemoteException e) {
+//                        e.printStackTrace();
 //                    }
+                    break;
+                case SHOW_TYPE_TURN_CALL:
                     WindowDialog.initInstance();
                     List<NfHfpClientCall> hfpCallList = null;
                     try {
@@ -257,52 +273,64 @@ public class CallInterfaceManagement {
      *
      */
     public  void setTopApp(boolean isIncomming,Context mContext) {
+
+        if(isIncomming){
+            Intent intent = new Intent();
+            intent.setClass(mContext, IncomingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }else {
+            Intent intent = new Intent();
+            intent.setClass(mContext, CallingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }
 //        if (!getTopAppPackageName(context)) {
             /**获取ActivityManager*/
-            ActivityManager activityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-
-            /**获得当前运行的task(任务)*/
-            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
-            boolean isYou = false;
-            if(isIncomming){
-                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                    /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".IncomingActivity")) {
-                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
-                        activityManager.moveTaskToFront(taskInfo.id, 0);
-                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
-                        isYou = true;
-                        break;
-                    }
-                }
-            }else {
-                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                    /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".CallingActivity")) {
-                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
-                        activityManager.moveTaskToFront(taskInfo.id, 0);
-                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
-                        isYou = true;
-                        break;
-                    }
-                }
-            }
-
-            if(!isYou){
-                Log.d(TAG, "setTopApp: 启动CallingActivity" );
-                if(isIncomming){
-                    Intent intent = new Intent();
-                    intent.setClass(mContext, IncomingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                }else {
-                    Intent intent = new Intent();
-                    intent.setClass(mContext, CallingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                }
-
-            }
+//            ActivityManager activityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+//
+//            /**获得当前运行的task(任务)*/
+//            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
+//            boolean isYou = false;
+//            if(isIncomming){
+//                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
+//                    /**找到本应用的 task，并将它切换到前台*/
+//                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".IncomingActivity")) {
+//                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
+//                        activityManager.moveTaskToFront(taskInfo.id, 0);
+//                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
+//                        isYou = true;
+//                        break;
+//                    }
+//                }
+//            }else {
+//                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
+//                    /**找到本应用的 task，并将它切换到前台*/
+//                    if (taskInfo.topActivity.getClassName().equals(mContext.getPackageName()+".CallingActivity")) {
+//                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
+//                        activityManager.moveTaskToFront(taskInfo.id, 0);
+//                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
+//                        isYou = true;
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            if(!isYou){
+//                Log.d(TAG, "setTopApp: 启动CallingActivity" );
+//                if(isIncomming){
+//                    Intent intent = new Intent();
+//                    intent.setClass(mContext, IncomingActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    mContext.startActivity(intent);
+//                }else {
+//                    Intent intent = new Intent();
+//                    intent.setClass(mContext, CallingActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    mContext.startActivity(intent);
+//                }
+//
+//            }
 //            if(isIncomming){
 //                Intent intent = new Intent();
 //                intent.setClass(context, IncomingActivity.class);

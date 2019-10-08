@@ -24,6 +24,10 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@color/windowBackground</item>
     </style>
+    <style name="InOutTheme" parent="MainTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:windowAnimationStyle">@style/activityAnimation</item>
+    </style>
 
     <style name="Radio_button_first_style">
         <item name="android:layout_width">match_parent</item>
@@ -55,6 +59,14 @@
         <item name="android:layout_alignParentBottom">true</item>
     </style>
 
+    <!-- animation 样式 -->
+    <style name="activityAnimation" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@anim/push_right_in</item>
+        <!--<item name="android:activityOpenExitAnimation">@anim/push_left_out</item>-->
+        <!--<item name="android:activityCloseEnterAnimation">@anim/push_left_in</item>-->
+        <item name="android:activityCloseExitAnimation">@anim/push_right_out</item>
+    </style>
+
     <!--<style name="RadioGroupStyle">-->
         <!--&lt;!&ndash; Customize your theme here. &ndash;&gt;-->
         <!--<item name="android:layout_width">0dp</item>-->
@@ -75,7 +87,6 @@
         <item name="android:layout_height">100px</item>
         <item name="android:button">@null</item>
         <item name="android:gravity">center_horizontal|bottom</item>
-
         <item name="android:textColor">@drawable/selector_main_textcolor</item>
         <!--center_vertical-->
         <item name="android:textSize">20px</item>

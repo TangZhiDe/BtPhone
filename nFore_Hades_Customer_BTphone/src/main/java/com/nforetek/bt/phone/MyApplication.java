@@ -26,7 +26,7 @@ public class MyApplication extends Application {
     private static final String TAG = MyApplication.class.getCanonicalName();
     public static boolean isKeyboardShow = false;
     public static boolean iCall_state = false;//   i/bCall是否在通话中
-    public static String Verson = "_V2.6";
+    public static String Verson = "_V2.8.2";
     @Override
     public void onCreate() {
         super.onCreate();

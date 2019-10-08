@@ -53,6 +53,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     private TextView calling_firName;
     private ImageView calling_img_bg;
     public static CallingActivity callingActivity;
+    private boolean isMove = false;//是否需要将蓝牙电话移动到后台
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: ");
+        isMove = true;
         if (mBPresenter != null) {
             if (MyApplication.isKeyboardShow) {
                 calling_info.setVisibility(View.GONE);
@@ -505,6 +507,8 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
 //                finish();
                 break;
             case R.id.calling_showDialog:
+                isMove = true;
+                BtUtils.finish(CallingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
                 break;
@@ -513,6 +517,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
 
         }
     }
+
 
     @Override
     public boolean onLongClick(View view) {
@@ -541,6 +546,9 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
+//        if(isMove){
+//            moveTaskToBack(true);
+//        }
 //        if(mBPresenter != null){
 //            mBPresenter.setCallingActivity(null);
 //        }

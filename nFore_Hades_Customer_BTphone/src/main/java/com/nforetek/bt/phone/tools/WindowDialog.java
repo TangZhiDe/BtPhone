@@ -1,5 +1,6 @@
 package com.nforetek.bt.phone.tools;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -236,79 +237,8 @@ public class WindowDialog implements View.OnClickListener{
                 break;
         }
     }
-    /**
-     * 将本应用置顶到最前端
-     * 当本应用位于后台时，则将它切换到最前端
-     *
-     * @param context
-     */
-    public static void setTopApp(Context context,boolean isIncomming) {
-        if (!getTopAppPackageName(context)) {
-            /**获取ActivityManager*/
-            ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 
-            /**获得当前运行的task(任务)*/
-            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
-            boolean isYou = false;
-            if(isIncomming){
-                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                    /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(context.getPackageName()+".IncomingActivity")) {
-                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
-                        activityManager.moveTaskToFront(taskInfo.id, 0);
-                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
-                        isYou = true;
-                        break;
-                    }
-                }
-            }else {
-                for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                    /**找到本应用的 task，并将它切换到前台*/
-                    if (taskInfo.topActivity.getClassName().equals(context.getPackageName()+".CallingActivity")) {
-                        Log.d(TAG, "setTopApp: "+taskInfo.topActivity.getClassName());
-                        activityManager.moveTaskToFront(taskInfo.id, 0);
-                        Log.d(TAG, "setTopApp: 将CallingActivity切换到前台" );
-                        isYou = true;
-                        break;
-                    }
-                }
-            }
 
-            if(!isYou){
-                Log.d(TAG, "setTopApp: 启动CallingActivity" );
-                if(isIncomming){
-                    Intent intent = new Intent();
-                    intent.setClass(context, IncomingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                }else {
-                    Intent intent = new Intent();
-                    intent.setClass(context, CallingActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                }
-
-            }
-        }
-    }
-    /**
-     * 获取前台应用
-     */
-    public static boolean getTopAppPackageName(Context context) {
-        try {
-            ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-            if(!rti.isEmpty()){
-                String packageName = rti.get(0).topActivity.getPackageName();
-                Log.d(TAG, "getTopAppPackageName:packageName==== " + packageName);
-                if(packageName.equals(context.getPackageName())){
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
-    }
     private void init() {
         wm = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         wmParams = new WindowManager.LayoutParams();

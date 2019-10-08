@@ -89,7 +89,7 @@ public class ShareInfoUtils {
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                     if(UID.equals("ADAYO_SOURCE_BT_PHONE")){
                         Log.d("parseSkinInfo", "parseSkinInfo1: ");
-                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
+                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_TURN_CALL);
                     } else {
                         management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_YUAN);
                     }

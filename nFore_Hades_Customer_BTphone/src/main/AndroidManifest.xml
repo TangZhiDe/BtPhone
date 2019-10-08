@@ -52,7 +52,7 @@
         <!--android:launchMode="singleInstance" android:configChanges="locale|uiMode"-->
         <activity
             android:name=".IncomingActivity"
-            android:theme="@style/MainTheme"
+            android:theme="@style/InOutTheme"
             />
 
         <service
@@ -83,7 +83,7 @@
         <!--</receiver>-->
 <!--android:configChanges="locale|uiMode"-->
         <activity android:name=".CallingActivity"
-            android:theme="@style/MainTheme"
+            android:theme="@style/InOutTheme"
             >
         </activity>
     </application>
