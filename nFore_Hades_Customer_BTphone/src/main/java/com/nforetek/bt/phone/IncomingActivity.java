@@ -140,7 +140,7 @@ public class IncomingActivity extends Activity {
 //                WindowDialog instance = WindowDialog.getInstance(getApplication());
 //                instance.show();
                 isMove = true;
-                BtUtils.finish(IncomingActivity.this);
+//                BtUtils.finish(IncomingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(IncomingActivity.this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
             }

@@ -23,6 +23,7 @@ import android.view.View;
 import com.adayo.adayosource.AdayoSource;
 import com.adayo.proxy.settings.SettingExternalManager;
 import com.adayo.proxy.sourcemngproxy.Control.SrcMngAudioSwitchProxy;
+import com.adayo.proxy.sourcemngproxy.Control.SrcMngSwitchProxy;
 import com.adayo.proxy.sourcemngproxy.Interface.IAdayoFocusChange;
 import com.adayo.systemserviceproxy.SystemServiceManager;
 import com.nforetek.bt.aidl.NfHfpClientCall;
@@ -56,7 +57,6 @@ public class CallService extends Service {
     private SrcMngAudioSwitchProxy mSrcMngAudioSwitchProxy;
     private View dialogView;
     public static boolean backCarState = false;//倒车状态 true-倒车  false-非倒车
-    private boolean audioFocus = false; //音频焦点是否申请成功
     private int mProperty = NfDef.PBAP_PROPERTY_MASK_FN |
             NfDef.PBAP_PROPERTY_MASK_N |
             NfDef.PBAP_PROPERTY_MASK_TEL |
@@ -675,8 +675,10 @@ public class CallService extends Service {
 
     //释放焦点
     private void releaseAudioFocus() {
-        if (!audioFocus) {
-            Log.d(TAG, "applyAudioFocus: 音频焦点已经释放,不需要再次释放");
+        String currentAudioFocus =  SrcMngSwitchProxy.getInstance().getCurrentAudioFocus();
+        Log.d(TAG, "releaseAudioFocus: 当前焦点  == "+currentAudioFocus);
+        if(!currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
+            Log.d(TAG, "releaseAudioFocus: 当前焦点不在蓝牙电话，不需要释放");
             return;
         }
         setParms(false,7);
@@ -686,7 +688,6 @@ public class CallService extends Service {
                 mSrcMngAudioSwitchProxy = SrcMngAudioSwitchProxy.getInstance();
                 if (mSrcMngAudioSwitchProxy != null) {
                     if (mSrcMngAudioSwitchProxy.abandonAdayoAudioFocus()) {
-                        audioFocus = false;
                         Log.i(TAG, "------------------------------------------释放焦点成功----------------------------------------------");
                     } else {
                         Log.i(TAG, "------------------------------------------释放焦点失败----------------------------------------------");
@@ -704,10 +705,13 @@ public class CallService extends Service {
             Log.d(TAG, "applyAudioFocus: i/bCall 正在通话不申请焦点");
             return;
         }
-        if (audioFocus) {
+        String currentAudioFocus =  SrcMngSwitchProxy.getInstance().getCurrentAudioFocus();
+        Log.d(TAG, "applyAudioFocus: 当前焦点  == "+currentAudioFocus);
+        if(currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
             Log.d(TAG, "applyAudioFocus: 音频焦点已经获取,不需要再次获取");
             return;
         }
+
         new Thread() {
             @Override
             public void run() {
@@ -770,11 +774,9 @@ public class CallService extends Service {
 
                     //AudioManager.STREAM_VOICE_CALL   AUDIOFOCUS_GAIN_TRANSIENT AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
                     if (mSrcMngAudioSwitchProxy.requestAdayoAudioFocus(6, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)) {//经江文尧工确认，换成混音AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
-                        audioFocus = true;
                         Log.i(TAG, "------------------------------------------申请焦点成功-----AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------------");
                         setParms(true,state);
                     } else {
-                        audioFocus = false;
                         Log.i(TAG, "------------------------------------------申请焦点失败-----------AUDIOFOCUS_GAIN_TRANSIENT-----------------------------------");
                     }
                 } else {
@@ -788,7 +790,6 @@ public class CallService extends Service {
 private  boolean muteSwitch = false;
     private void setParms(boolean isFocus,int state){
         SettingExternalManager settingsManager = SettingExternalManager.getSettingsManager();
-        boolean muteSwitch = settingsManager.getMuteSwitch();
         Log.d(TAG, "setParms: isFocus="+isFocus +"--state--"+state);
         if(isFocus){
             try {
@@ -799,7 +800,9 @@ private  boolean muteSwitch = false;
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            this.muteSwitch = muteSwitch;
+            boolean muteSwitch1 = settingsManager.getMuteSwitch();
+            this.muteSwitch = muteSwitch1;
+            Log.d(TAG, "setParms: muteSwitch = "+muteSwitch);
             if(muteSwitch){
                 settingsManager.setMuteSwitch(false);
             }
@@ -810,6 +813,7 @@ private  boolean muteSwitch = false;
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+            Log.d(TAG, "setParms: muteSwitch = "+muteSwitch);
             if(this.muteSwitch){
                 Log.d(TAG, "setParms: 电话之前是静音，挂断后设置为静音");
                 settingsManager.setMuteSwitch(true);

@@ -125,10 +125,9 @@ public class CallInterfaceManagement {
                     }
                     break;
                 case SHOW_TYPE_DIALOG:
-//                    ((Activity)context).finish();
-                    ((Activity)context).moveTaskToBack(true);
+//                    ((Activity)context).moveTaskToBack(true);
                     catSource(false);
-//                    myHandler.sendEmptyMessage(0);
+                    myHandler.sendEmptyMessageDelayed(2,1000);
                     break;
                 case SHOW_TYPE_YUAN:
                     if(!getTopAppPackageName(context)){
@@ -235,6 +234,12 @@ public class CallInterfaceManagement {
                         e.printStackTrace();
                     }
 
+                    break;
+
+                case 2:
+
+                    BtUtils.finish(CallingActivity.callingActivity);
+                    BtUtils.finish(IncomingActivity.bTphoneCallActivity);
                     break;
             }
 

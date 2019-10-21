@@ -496,7 +496,6 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 break;
             case R.id.calling_hangup:
                 try {
-
                     if (mBPresenter != null && mBPresenter.isHfpConnected()) {
                         mBPresenter.reqHfpTerminateCurrentCall();
                     }
@@ -508,7 +507,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 break;
             case R.id.calling_showDialog:
                 isMove = true;
-                BtUtils.finish(CallingActivity.this);
+//                BtUtils.finish(CallingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                 management.showCallInterface(this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
                 break;

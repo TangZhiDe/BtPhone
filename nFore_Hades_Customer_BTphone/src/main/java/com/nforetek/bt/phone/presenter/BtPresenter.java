@@ -2032,18 +2032,18 @@ public class BtPresenter implements
     public void onHfpAudioStateChanged(String address, int prevState,
                                        int newState) {
         Log.i(TAG, "onHfpAudioStateChanged");
-//        if (getCallingActivity() != null) {
-//            Message msg = new Message();
-//            msg.what = 0;
-//            msg.arg1 = newState;
-//            getCallingActivity().myHandler.sendMessage(msg);
-//        }
-//        if (getWindowDialog() != null) {
-//            Message msg = new Message();
-//            msg.what = 0;
-//            msg.arg1 = newState;
-//            getWindowDialog().mHandler.sendMessage(msg);
-//        }
+        if (getCallingActivity() != null) {
+            Message msg = new Message();
+            msg.what = 0;
+            msg.arg1 = newState;
+            getCallingActivity().myHandler.sendMessage(msg);
+        }
+        if (getWindowDialog() != null) {
+            Message msg = new Message();
+            msg.what = 0;
+            msg.arg1 = newState;
+            getWindowDialog().mHandler.sendMessage(msg);
+        }
         if (mSettingChangeListener == null) {
             return;
         }
