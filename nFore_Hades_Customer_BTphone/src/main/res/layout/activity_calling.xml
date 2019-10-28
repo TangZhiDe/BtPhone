@@ -110,11 +110,12 @@
                 android:layout_marginTop="45px"
                 android:gravity="center"
                 android:singleLine="true"
-                android:text="00:01"
+                android:text="@string/string15"
                 android:textColor="@color/tab_selected"
                 android:textSize="32px" />
 <!--
-                android:text="@string/string15"-->
+                android:text="@string/string15"
+                android:text="00:01"-->
         </LinearLayout>
 
         <!--键盘-->

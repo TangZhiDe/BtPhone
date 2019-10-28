@@ -42,6 +42,7 @@ import android.widget.TextView;
 import com.adayo.adayosource.AdayoSource;
 import com.adayo.app.base.BaseActivity;
 import com.adayo.app.utils.LogUtils;
+import com.adayo.proxy.keyevent.KeyEventManager;
 import com.adayo.proxy.sourcemngproxy.Beans.AppConfigType;
 import com.adayo.proxy.sourcemngproxy.Beans.SourceInfo;
 import com.adayo.proxy.sourcemngproxy.Control.SrcMngSwitchProxy;
@@ -549,7 +550,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         //设置状态栏图标为深色
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        LogUtils.iL(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
         btPhoneMainActivity = this;
         if(MyApplication.mBPresenter != null){
             MyApplication.mBPresenter.setBtPhoneMainActivity(this);
@@ -591,13 +592,13 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         } else {
             Log.d(TAG, "onResume: mBPresenter == null");
         }
-        LogUtils.iL(TAG, "onResume");
+        Log.d(TAG, "onResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LogUtils.iL(TAG, "onPause");
+        Log.d(TAG, "onPause");
     }
 
     @Override
@@ -614,7 +615,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             MyApplication.mBPresenter.setBtPhoneMainActivity(null);
         }
         unRegisterSourceOff();
-        LogUtils.iL(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
     }
 
 
@@ -625,16 +626,19 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 Log.v(TAG, "button_num1 onClicked");
                 onNumberClick("1");
                 break;
+
             case R.id.number02:
                 Log.v(TAG, "button_num2 onClicked");
 
                 onNumberClick("2");
                 break;
+
             case R.id.number03:
                 Log.v(TAG, "button_num3 onClicked");
 
                 onNumberClick("3");
                 break;
+
             case R.id.number04:
                 Log.v(TAG, "button_num4 onClicked");
 
@@ -657,17 +661,16 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 break;
             case R.id.number08:
                 Log.v(TAG, "button_num8 onClicked");
-
                 onNumberClick("8");
+
                 break;
             case R.id.number09:
                 Log.v(TAG, "button_num9 onClicked");
-
                 onNumberClick("9");
+
                 break;
             case R.id.number00:
                 Log.v(TAG, "button_num0 onClicked");
-
                 onNumberClick("0");
                 break;
 
@@ -677,30 +680,35 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 onNumberClick("*");
                 break;
 
-            //  #  号建
+            //#号建
             case R.id.numberjinhao:
                 Log.v(TAG, "button_num# onClicked");
                 onNumberClick("#");
                 break;
+
             case R.id.keyboard_call:
                 try {
-                    if (input_number.length() != 0 && mBPresenter != null && mBPresenter.isHfpConnected()) {
-                        mBPresenter.reqHfpDialCall(input_number);
-                        Log.d(TAG, "onClick: 进入通话界面1");
-//						Intent intent1 = new Intent();
-//						intent1.setClass(this,CallingActivity.class);
-//						intent1.putExtra("number",input_number);
-//						intent1.putExtra("name","");
-//						intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//						startActivity(intent1);
-                        input_number = input_number.substring(0, 0);
-                        phone_num.setText(input_number);
-
+                    if ( mBPresenter != null && mBPresenter.isHfpConnected()) {
+                        if(input_number.length() != 0){
+                            mBPresenter.reqHfpDialCall(input_number);
+                            Log.d(TAG, "onClick: 进入通话界面1");
+                            input_number = input_number.substring(0, 0);
+                            phone_num.setText(input_number);
+                        }else {
+                            if(MyApplication.recordsList.size() >0){
+                                String number = MyApplication.recordsList.get(0).getNumber();
+                                phone_num.setText(number);
+                                input_number = number;
+                            }else {
+                                Log.d(TAG, "onClick: recordsList为空，没有同步通话记录");
+                            }
+                        }
                     }
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
                 break;
+
             case R.id.keyboard_delete:
 //                if (input_number.length() != 0) {
 //                    input_number = input_number.substring(0, input_number.length() - 1);
@@ -732,7 +740,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //                    phone_num.setCursorVisible(false);
                     phoneTextCursor = false;
                 }
+
                 break;
+
             case R.id.main_disconnect:
                 final ConfirmDialog confirmDialog = new ConfirmDialog(this, btRemoteDeviceName + "?");
                 confirmDialog.show();
@@ -762,17 +772,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 break;
             case R.id.main_disconnect_toconnect:
                 //跳转到设置界面连接
-//                Intent newAct = new Intent();
-//                newAct.putExtra("flag",1);
-//                newAct.setComponent(new ComponentName("com.adayo.app.settings", "com.adayo.app.settings.ui.activity.SettingsMainActivity"));
-//                startActivity(newAct);
-//                SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
-//                Map<String, String> map = new HashMap<>();
-//                map.put("bt", "ConnectBt");
-//                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING, map,
-//                        AppConfigType.SourceSwitch.APP_ON.getValue(), AppConfigType.SourceType.UI.getValue());
-//                srcMngSwitchProxy.onRequest(info);
-
                 SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
                 HashMap<String, String> map = new HashMap<>();
                 map.put("bt", "ConnectBt");
@@ -798,6 +797,8 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 break;
             case R.id.number00:
                 onNumberClick("+");
+                //调用这个方法让长按事件发出声音
+                KeyEventManager.getKeyEventManager(this).playTouchTone();
                 break;
             case R.id.numberjinhao:
 //                onNumberClick(";");

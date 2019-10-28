@@ -69,7 +69,7 @@ public class FangKongReceiver extends BroadcastReceiver {
             }
 
         }else if(intent.getAction().equals("com.adayo.setting.configChange")){
-            boolean topAppPackageName = CallInterfaceManagement.getTopAppPackageName(context);
+            boolean topAppPackageName = CallInterfaceManagement.getCurrentUid(context);
             Log.d(TAG, "onReceive: 收到广播昼夜 中英文切换  topAppPackageName =="+topAppPackageName);
             if(!topAppPackageName){
                 MyApplication.finishApp();

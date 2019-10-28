@@ -1,7 +1,5 @@
 package com.nforetek.bt.phone.tools;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -81,7 +79,7 @@ public class CallInterfaceManagement {
         if(MyApplication.iCall_state){
             myHandler.sendEmptyMessage(1);
         }else {
-            boolean isBtAtTop = getTopAppPackageName(context);
+            boolean isBtAtTop = getCurrentUid(context);
             switch (type){
                 case SHOW_TYPE_IN:
                     if(isBtAtTop){
@@ -127,12 +125,11 @@ public class CallInterfaceManagement {
                 case SHOW_TYPE_DIALOG:
 //                    ((Activity)context).moveTaskToBack(true);
                     catSource(false);
-                    myHandler.sendEmptyMessageDelayed(2,1000);
+                    myHandler.sendEmptyMessageDelayed(2,500);
                     break;
                 case SHOW_TYPE_YUAN:
-                    if(!getTopAppPackageName(context)){
+                    if(!getCurrentUid(context)){
                         myHandler.sendEmptyMessage(0);
-
                     }
                     break;
                 case SHOW_TYPE_Activity:
@@ -195,6 +192,9 @@ public class CallInterfaceManagement {
         SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_BT_PHONE,null,map,
                 value,  UI_AUDIO.getValue(),bundle);
         srcMngSwitchProxy.onRequest(info);
+        if(!isON){
+            srcMngSwitchProxy.notifyAppFinished(AdayoSource.ADAYO_SOURCE_BT_PHONE);
+        }
     }
 
     private Handler myHandler = new Handler(new Handler.Callback() {
@@ -233,11 +233,8 @@ public class CallInterfaceManagement {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-
                     break;
-
                 case 2:
-
                     BtUtils.finish(CallingActivity.callingActivity);
                     BtUtils.finish(IncomingActivity.bTphoneCallActivity);
                     break;
@@ -252,20 +249,26 @@ public class CallInterfaceManagement {
     /**
      * 获取前台应用
      */
-    public static boolean getTopAppPackageName(Context context) {
-        try {
-            ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
-            if (!rti.isEmpty()) {
-                String packageName = rti.get(0).topActivity.getPackageName();
-                Log.d(TAG, "getTopAppPackageName:topActivity==== " + rti.get(0).topActivity.getClassName());
-                Log.d(TAG, "getTopAppPackageName:packageName==== " + packageName);
-                if (packageName.equals(context.getPackageName())) {
-                    return true;
-                }
-            }
-        } catch (Exception ignored) {
-
+    public static boolean getCurrentUid(Context context) {
+//        try {
+//            ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+//            List<ActivityManager.RunningTaskInfo> rti = mActivityManager.getRunningTasks(1);
+//            if (!rti.isEmpty()) {
+//                String packageName = rti.get(0).topActivity.getPackageName();
+//                Log.d(TAG, "getCurrentUid:topActivity==== " + rti.get(0).topActivity.getClassName());
+//                Log.d(TAG, "getCurrentUid:packageName==== " + packageName);
+//                if (packageName.equals(context.getPackageName())) {
+//                    return true;
+//                }
+//            }
+//        } catch (Exception ignored) {
+//
+//        }
+        SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
+        String currentUID = srcMngSwitchProxy.getCurrentUID();
+        Log.d(TAG, "getCurrentUid: "+currentUID);
+        if(currentUID.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
+            return true;
         }
         return false;
     }
@@ -290,7 +293,7 @@ public class CallInterfaceManagement {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }
-//        if (!getTopAppPackageName(context)) {
+//        if (!getCurrentUid(context)) {
             /**获取ActivityManager*/
 //            ActivityManager activityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
 //

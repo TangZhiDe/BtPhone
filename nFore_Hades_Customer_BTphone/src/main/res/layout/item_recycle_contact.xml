@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/selector_item_pressed"
+    android:importantForAccessibility="no"
     android:layout_height="94px">
     <!-- android:background="@drawable/selector_item_pressed"-->
     <!--<ImageView-->
@@ -26,6 +27,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:src="@drawable/bt_right_ic_contact"
+            android:importantForAccessibility="no"
             android:scaleType="center"
             android:layout_height="match_parent" />
         <TextView
@@ -33,6 +35,7 @@
             android:gravity="center"
             android:id="@+id/irc_firName"
             android:textColor="#fff"
+            android:importantForAccessibility="no"
             android:shadowColor="@color/bt_shadow_color"
             android:shadowDx="4"
             android:shadowDy="4"
@@ -70,6 +73,7 @@
         android:layout_toRightOf="@id/irc_img"
         android:layout_marginLeft="17px"
         android:layout_centerVertical="true"
+        android:importantForAccessibility="no"
         android:orientation="vertical"
         android:layout_height="wrap_content">
         <TextView
@@ -78,6 +82,7 @@
             android:text="唐智德"
             android:width="200px"
             android:textSize="26px"
+            android:importantForAccessibility="no"
             android:singleLine="true"
             android:textColor="@color/btcolor12"
             android:layout_height="wrap_content" />
@@ -86,6 +91,7 @@
             android:id="@+id/irc_num"
             android:text="13677888899"
             android:width="200px"
+            android:importantForAccessibility="no"
             android:visibility="gone"
             android:textSize="26px"
             android:singleLine="true"

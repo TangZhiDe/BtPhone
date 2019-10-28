@@ -249,10 +249,7 @@ public class WindowDialog implements View.OnClickListener{
         wmParams.height = 160;
         wmParams.x = x;
         wmParams.y = y;
-//        if (childView != null) {
-//            addView(childView);
-//        }
-        //   wm.addView(this, wmParams);
+
     }
 
     public void dismiss() {
