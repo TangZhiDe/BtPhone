@@ -26,7 +26,8 @@
     <string name="string13">呼出…</string>
     <string name="string14">挂断…</string>
     <string name="string15">拨号…</string>
-    <string name="string17">来电</string>
-    <string name="string18">拨号</string>
+    <string name="string17">来电中</string>
+    <string name="string18">拨号中</string>
     <string name="string19">昨天</string>
+    <string name="string20">通话中</string>
 </resources>

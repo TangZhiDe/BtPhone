@@ -1881,7 +1881,8 @@ public class BtPresenter implements
         }
 
         if (getWindowDialog() != null) {
-            windowChange(call);
+            getWindowDialog().mHandler.sendEmptyMessage(0x03);
+//            windowChange(call);
         }
 
         if (mPhoneChangeListener == null) {

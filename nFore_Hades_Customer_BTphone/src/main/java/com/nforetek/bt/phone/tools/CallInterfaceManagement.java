@@ -224,10 +224,11 @@ public class CallInterfaceManagement {
                         hfpCallList1 = btPresenter.getHfpCallList();
                         if(hfpCallList1 != null && hfpCallList1.size()>0){
                             Log.d(TAG, "handleMessage: hfpCallList size="+hfpCallList1.size());
-                            WindowDialog1 instance = WindowDialog1.getInstance(context);
+                            WindowDialog instance = WindowDialog.getInstance(context);
                             if(!instance.mIsShow){
                                 instance.show();
                             }
+                            myHandler.sendEmptyMessageDelayed(3,5000);
                         }
 
                     } catch (RemoteException e) {
@@ -237,6 +238,10 @@ public class CallInterfaceManagement {
                 case 2:
                     BtUtils.finish(CallingActivity.callingActivity);
                     BtUtils.finish(IncomingActivity.bTphoneCallActivity);
+                    break;
+                case 3:
+                    Log.d(TAG, "handleMessage: 5s过后自动隐藏弹窗");
+                    WindowDialog.initInstance();
                     break;
             }
 

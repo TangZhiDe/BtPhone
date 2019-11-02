@@ -108,7 +108,7 @@ public class CallService extends Service {
         if (btLocalAddress != null) {
             String s = btLocalAddress.replaceAll(":", "");
             if (s.length() > 6) {
-                name = s.substring(6);
+                name = "DFSK_"+s.substring(6);
             }
         }
         try {

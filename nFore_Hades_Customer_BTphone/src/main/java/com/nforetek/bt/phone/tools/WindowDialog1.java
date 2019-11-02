@@ -122,7 +122,7 @@ public class WindowDialog1 implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.window_finish:
+            case R.id.window1_finish:
                 //影藏弹窗
                 initInstance();
                 break;
