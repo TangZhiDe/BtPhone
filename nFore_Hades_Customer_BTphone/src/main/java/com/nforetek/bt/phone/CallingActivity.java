@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nforetek.bt.aidl.NfHfpClientCall;
+import com.nforetek.bt.base.jar.NforeBtBaseJar;
 import com.nforetek.bt.phone.presenter.BtPresenter;
 import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
@@ -260,7 +261,6 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                     try {
                         List<NfHfpClientCall> callList = mBPresenter.getHfpCallList();
                         if (callList != null) {
-
                             switch (callList.size()) {
                                 case 1: {
                                     Log.i(TAG, "------callList.size()-------" + callList.size());
@@ -268,7 +268,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                                     String number = call.getNumber();
                                     Log.i(TAG, "------number-------" + number);
                                     calling_num.setText(number);
-                                    String callName = GetInfoFormContacts.getNameFromContacts(number);
+                                    String callName = mBPresenter.getCallName(number);
                                     if(callName != null && callName != ""){
                                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
                                         calling_firName.setVisibility(View.VISIBLE);
@@ -400,7 +400,6 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 break;
             case R.id.number05:
                 Log.v(TAG, "button_num5 onClicked");
-
                 onNumberClick("5");
                 break;
             case R.id.number06:
@@ -502,6 +501,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
+
                 Log.d(TAG, "onClick:calling_hangup ");
 //                finish();
                 break;
@@ -509,7 +509,7 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                 isMove = true;
 //                BtUtils.finish(CallingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                management.showCallInterface(this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
+                management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_DIALOG);
                 break;
             default:
                 break;

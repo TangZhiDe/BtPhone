@@ -7,8 +7,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +119,8 @@ public class RecordsFragment extends BaseFragment<BtPresenter> {
         Bundle args = new Bundle();
         args.putString(FRAG_FIRST_PARAM, param);
         fragment.setArguments(args);
+        fragment.setEnterTransition(new Slide(Gravity.START));
+//        fragment.setExitTransition(new Slide(Gravity.START));
         return fragment;
     }
 

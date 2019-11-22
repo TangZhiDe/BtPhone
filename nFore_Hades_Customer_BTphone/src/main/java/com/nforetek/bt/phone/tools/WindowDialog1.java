@@ -97,7 +97,7 @@ public class WindowDialog1 implements View.OnClickListener{
                 if(!hfpCallList.isEmpty()){
                     NfHfpClientCall call = hfpCallList.get(0);
                     String callNumber = call.getNumber();
-                    String callName1 = GetInfoFormContacts.getNameFromContacts(callNumber);
+                    String callName1 = mBPresenter.getCallName(callNumber);
                     if("".equals(callName1)){
                         callName1 = callNumber;
                     }
@@ -235,7 +235,7 @@ public class WindowDialog1 implements View.OnClickListener{
                             NfHfpClientCall call = hfpCallList.get(0);
                             int state = call.getState();
                             String callNumber = call.getNumber();
-                            String callName1 = GetInfoFormContacts.getNameFromContacts(callNumber);
+                            String callName1 = mBPresenter.getCallName(callNumber);
                             if("".equals(callName1)){
                                 callName1 = callNumber;
                             }

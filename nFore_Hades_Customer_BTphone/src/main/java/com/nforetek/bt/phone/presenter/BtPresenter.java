@@ -62,16 +62,16 @@ public class BtPresenter implements
     private static boolean isSetUiCallLogsToDB = false;
 //    private BtPresenter(){};
 
-    /**
-     * 获得Presenter实例
-     **/
-//    public static BtPresenter getInstance(){
-//    	Log.i(TAG,"----------getInstance-----------");
-//    	return INSTANCE;
-//    }
-//
-    public BtPresenter() {
-
+    private static BtPresenter instance = null;
+    private BtPresenter(Context context){
+        registerServiceListener(context);
+    }
+    public static BtPresenter getInstance(Context context){
+        if(null == instance){
+            Log.d(TAG, "getInstance: 实例化" );
+            instance = new BtPresenter(context);
+        }
+        return instance;
     }
 
     public void registerView(IBtContract view) {
@@ -1650,21 +1650,7 @@ public class BtPresenter implements
     public String getCallName(String number) throws RemoteException {
         Log.v(TAG, "getCallName() " + number);
         String name = "";
-        switch (number) {
-            case "10086":
-                name = "中国移动";
-                break;
-            case "10010":
-                name = "中国联通";
-                break;
-            case "10000":
-                name = "中国电信";
-                break;
-
-            default:
-                name = NforeBtBaseJar.getCallName(number);
-                break;
-        }
+        name = NforeBtBaseJar.getCallName(number);
         return name;
     }
 

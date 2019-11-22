@@ -22,19 +22,19 @@ public class MyApplication extends Application {
     public static List<CallLogs> recordsList = new ArrayList<>();
     public static String connectAddress ="";
     public static BtPresenter mBPresenter;
-    private boolean isRegisterServiceListener;
     private static final String TAG = MyApplication.class.getCanonicalName();
     public static boolean isKeyboardShow = false;
     public static boolean iCall_state = false;//   i/bCall是否在通话中
-    public static String Verson = "_V2.7.3";
+    public static boolean answerSouce = true;//   是否响应切源
+    public static boolean backCarState = false;//倒车状态 true-倒车  false-非倒车
+    public static String Verson = "_V3.3";
     @Override
     public void onCreate() {
         super.onCreate();
-        mBPresenter = new BtPresenter();
-        isRegisterServiceListener = mBPresenter.registerServiceListener(this);
-        CallInterfaceManagement instance = CallInterfaceManagement.getCallInterfaceManagementInstance();
-        instance.setParms(this,mBPresenter);
-        Log.d(TAG, "onCreate: 实例化BtPresenter，绑定服务isRegisterServiceListener="+isRegisterServiceListener);
+        Log.d(TAG, "onCreate: ");
+        mBPresenter = BtPresenter.getInstance(this);
+//        CallInterfaceManagement instance = CallInterfaceManagement.getCallInterfaceManagementInstance();
+//        instance.setParms(this,mBPresenter);
     }
 
     @Override
@@ -58,15 +58,11 @@ public class MyApplication extends Application {
         BtUtils.finish(IncomingActivity.bTphoneCallActivity );
     }
 
-
     @Override
     public void onTerminate() {
         super.onTerminate();
-        if(isRegisterServiceListener){
+        if(mBPresenter != null){
             mBPresenter.unregisterServiceListener();
-            isRegisterServiceListener = false;
-        }
-        if(mBPresenter!=null){
             mBPresenter = null;
         }
     }

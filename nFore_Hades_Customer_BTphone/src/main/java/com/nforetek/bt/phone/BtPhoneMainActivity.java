@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -135,7 +136,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         setCommunications();
         loadFragmentSA();
         init();
-
     }
 
     @Override
@@ -479,6 +479,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             mBPresenter.setContactFragment(contactFragment);
             mBPresenter.setRecordsFragment(recordsFragment);
             mBPresenter.registerView(this);
+
             contactFragment.setBPresenter(mBPresenter);
             recordsFragment.setBPresenter(mBPresenter);
         } else {
@@ -539,6 +540,17 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         LogUtils.iL(TAG, "setCommunications");
         contactFragment.setCommunication(this);
         recordsFragment.setCommunication(this);
+
+    }
+
+
+    private void showFragment(int index) {
+
+        android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+//        ft.setCustomAnimations()
+
+
+        ft.commit();
     }
 
     @Override
@@ -555,6 +567,10 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         if(MyApplication.mBPresenter != null){
             MyApplication.mBPresenter.setBtPhoneMainActivity(this);
         }
+        Intent service = new Intent();
+        service.setAction("com.nforetek.bt.phone.callService");
+        service.setPackage(getPackageName());
+        startService(service);
         main_tabs = findViewById(R.id.main_tabs);
         tab_records = findViewById(R.id.tab_records);
         tab_contact = findViewById(R.id.tab_contact);
@@ -567,10 +583,12 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                         if (i == 0) {
                             Log.d(TAG, "onCheckedChanged: showpage1");
                             showPage(1);
+//                            showFragment(0);
                         }
                         if (i == 2) {
                             Log.d(TAG, "onCheckedChanged: showpage2");
                             showPage(2);
+//                            showFragment(1);
                         }
                     }
                 }

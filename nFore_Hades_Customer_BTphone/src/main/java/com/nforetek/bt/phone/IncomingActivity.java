@@ -109,7 +109,7 @@ public class IncomingActivity extends Activity {
                 if(!hfpCallList.isEmpty()){
                     NfHfpClientCall call = hfpCallList.get(0);
                     callNumber = call.getNumber();
-                    callName = GetInfoFormContacts.getNameFromContacts(callNumber);
+                    callName = mBPresenter.getCallName(callNumber);
                     if(callName != null && callName != ""){
                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
                         calling_firName.setVisibility(View.VISIBLE);
@@ -142,7 +142,7 @@ public class IncomingActivity extends Activity {
                 isMove = true;
 //                BtUtils.finish(IncomingActivity.this);
                 CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                management.showCallInterface(IncomingActivity.this,CallInterfaceManagement.SHOW_TYPE_DIALOG);
+                management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_DIALOG);
             }
         });
         incoming_hangup.setOnClickListener(new View.OnClickListener() {

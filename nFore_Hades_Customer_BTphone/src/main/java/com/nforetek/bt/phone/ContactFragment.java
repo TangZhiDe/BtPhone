@@ -11,7 +11,9 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -124,6 +126,8 @@ public class ContactFragment extends BaseFragment<BtPresenter> {
         Bundle args = new Bundle();
         args.putString(FRAG_FIRST_PARAM, param);
         fragment.setArguments(args);
+        fragment.setEnterTransition(new Slide(Gravity.END));
+//        fragment.setExitTransition(new Slide(Gravity.END));
         return fragment;
     }
 

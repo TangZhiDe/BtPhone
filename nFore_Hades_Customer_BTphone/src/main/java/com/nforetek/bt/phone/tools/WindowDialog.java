@@ -66,7 +66,7 @@ public class WindowDialog implements View.OnClickListener{
         this.context = context;
         this.mBPresenter = MyApplication.mBPresenter;
         this.x = 0;
-        this.y = 1020;
+        this.y = 900;
         if(mBPresenter != null){
             mBPresenter.setWindowDialog(this);
         }
@@ -83,11 +83,6 @@ public class WindowDialog implements View.OnClickListener{
             Log.d(TAG, "getInstance: 实例化" );
             instance = new WindowDialog(context);
         }
-        return instance;
-    }
-
-    public static WindowDialog getInstance(){
-        Log.d(TAG, "getInstance: " );
         return instance;
     }
     public static void initInstance(){
@@ -168,7 +163,7 @@ public class WindowDialog implements View.OnClickListener{
                 }else {
                     dismiss();
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                    management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_Activity);
+                    management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_Activity);
                 }
                 break;
 //            case R.id.window_answer:
@@ -258,10 +253,12 @@ public class WindowDialog implements View.OnClickListener{
     private void init() {
         wm = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         wmParams = new WindowManager.LayoutParams();
-        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+//        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;  //2037
+        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
         wmParams.windowAnimations = R.style.windowAnimation;
         wmParams.format = PixelFormat.TRANSLUCENT;
-        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+//        wmParams.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         wmParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
 //        wmParams.width = 1360;
 //        wmParams.height = 160;
@@ -297,6 +294,7 @@ public class WindowDialog implements View.OnClickListener{
                 try {
                     Log.d(TAG, "------------show---------------");
                     wm.addView(mView, wmParams);
+
                     mIsShow = true;
                     if(mBPresenter != null){
                         mHandler.sendEmptyMessage(0x03);

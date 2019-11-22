@@ -36,6 +36,7 @@ import com.nforetek.bt.phone.CallingActivity;
 import com.nforetek.bt.phone.IncomingActivity;
 import com.nforetek.bt.phone.MyApplication;
 import com.nforetek.bt.phone.R;
+import com.nforetek.bt.phone.presenter.BtPresenter;
 import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.GetInfoFormContacts;
@@ -55,8 +56,9 @@ public class CallService extends Service {
     private final int CALL = 1;
     private MediaPlayer mediaPlayer;
     private SrcMngAudioSwitchProxy mSrcMngAudioSwitchProxy;
+    private boolean needTurnCallActivity = true;//去电是否需要跳转
     private View dialogView;
-    public static boolean backCarState = false;//倒车状态 true-倒车  false-非倒车
+//    public static boolean backCarState = false;//倒车状态 true-倒车  false-非倒车
     private int mProperty = NfDef.PBAP_PROPERTY_MASK_FN |
             NfDef.PBAP_PROPERTY_MASK_N |
             NfDef.PBAP_PROPERTY_MASK_TEL |
@@ -83,8 +85,12 @@ public class CallService extends Service {
         mIntent.setPackage(str_sev_package);
         bindService(mIntent, mConnection, BIND_AUTO_CREATE);
         registerBroadcast();
+        needTurnCallActivity = true;
+        MyApplication.mBPresenter = BtPresenter.getInstance(this);
         //注册ShareInfo
         ShareInfoUtils.registerShareDataListener(this);
+        CallInterfaceManagement instance = CallInterfaceManagement.getCallInterfaceManagementInstance();
+        instance.setParms(this,MyApplication.mBPresenter);
         if (SystemServiceManager.getInstance().conectsystemService()) {
             Log.i(TAG, "---------conectsystemService------------");
             mAdayoVersion = SystemServiceManager.getInstance().getSystemConfigInfo((byte) 0x00);
@@ -205,6 +211,24 @@ public class CallService extends Service {
                             mCommand.registerHfpCallback(mCallbackHfp);
                             mCommand.registerPbapCallback(mCallbackPbap);
                             mCommand.registerBtCallback(mCallbackBluetooth);
+                            List<NfHfpClientCall> hfpCallList = mCommand.getHfpCallList();
+                            if(hfpCallList != null && hfpCallList.size()>0){
+                                NfHfpClientCall call = hfpCallList.get(0);
+                                if(call.getState() == NfHfpClientCall.CALL_STATE_INCOMING){
+                                    if (!MyApplication.backCarState ) {
+                                        //不在倒车状态 显示界面
+                                        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                                        management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_IN);
+                                    }
+                                }else {
+                                    if (!MyApplication.backCarState && needTurnCallActivity) {
+                                        needTurnCallActivity = false;
+                                        //不在倒车状态 显示界面
+                                        CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
+                                        management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_OUT_ONLY);
+                                    }
+                                }
+                            }
                             //设置蓝牙名称为地址后6位。
                             setBluetoothName();
                         } catch (RemoteException e) {
@@ -469,21 +493,22 @@ public class CallService extends Service {
         public void onHfpCallChanged(String address, NfHfpClientCall call) throws RemoteException {
             Log.d(TAG, "onHfpCallChanged getNumber!!" + call.getNumber());
             Log.d(TAG, "onHfpCallChanged getState!!" + call.getState());
-            Log.d(TAG, "onHfpCallChanged: 车机型号==" + mAdayoVersion + " backCarState 倒车状态= " + backCarState);
+            Log.d(TAG, "onHfpCallChanged: 车机型号==" + mAdayoVersion + " backCarState 倒车状态= " + MyApplication.backCarState);
             // 去电：7 来电： 挂断：
             String callNumber = call.getNumber();
             String callName = "";
             if (MyApplication.mBPresenter != null) {
-                callName = GetInfoFormContacts.getNameFromContacts(callNumber);
+//                callName = GetInfoFormContacts.getNameFromContacts(callNumber);
+                callName = MyApplication.mBPresenter.getCallName(callNumber);
             }
             if (call.getState() == NfHfpClientCall.CALL_STATE_ACTIVE) {//通话中
 //                    stopBell();
                 Log.d(TAG, "onHfpCallChanged:通话中: " + callName);
                 applyAudioFocus(call.getState());
-                if (!backCarState && !MyApplication.iCall_state) {
+                if (!MyApplication.backCarState && !MyApplication.iCall_state) {
                     //不在倒车状态 显示界面
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                    management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
+                    management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_OUT);
                 }
                 if (MyApplication.iCall_state && MyApplication.mBPresenter != null) {
                     Log.d(TAG, "onHfpCallChanged: ibCall正在进行 蓝牙电话转为私密模式");
@@ -493,6 +518,7 @@ public class CallService extends Service {
             } else if (call.getState() == NfHfpClientCall.CALL_STATE_TERMINATED) {  //结束通话
 //                    stopBell();         //停止来电铃声
                 BtUtils.finish(IncomingActivity.bTphoneCallActivity);
+                needTurnCallActivity  = true;
                 List<NfHfpClientCall> hfpCallList = mCommand.getHfpCallList();
                 if (hfpCallList.size() == 0) {
                     mhandler.sendEmptyMessage(0x03);
@@ -506,18 +532,18 @@ public class CallService extends Service {
                     Log.d(TAG, "------------CALL_STATE_INCOMING-----来电---------------");
                     applyAudioFocus(call.getState());     //申请焦点
                     collapsingNotification(CallService.this);
-                    if (!backCarState) {
+                    if (!MyApplication.backCarState) {
                         //不在倒车状态 显示界面
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_IN);
+                        management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_IN);
                     }
 
 
                 } else if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {     //去电
                     Log.d(TAG, "onHfpCallChanged:去电电话1: " + callName);
-                    if (!backCarState) {
+                    if (!MyApplication.backCarState) {
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
+                        management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_OUT_ONLY);
                     }
 
 
@@ -527,10 +553,11 @@ public class CallService extends Service {
                 if (call.getState() == NfHfpClientCall.CALL_STATE_DIALING || call.getState() == NfHfpClientCall.CALL_STATE_ALERTING) {
                     Log.d(TAG, "onHfpCallChanged:去电电话2: " + callName);
                     applyAudioFocus(call.getState());
-                    if (!backCarState) {
+                    if (!MyApplication.backCarState && needTurnCallActivity) {
+                        needTurnCallActivity = false;
                         //不在倒车状态 显示界面
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(CallService.this, CallInterfaceManagement.SHOW_TYPE_OUT);
+                        management.showCallInterface( CallInterfaceManagement.SHOW_TYPE_OUT_ONLY);
                     }
 
 
@@ -675,12 +702,12 @@ public class CallService extends Service {
 
     //释放焦点
     private void releaseAudioFocus() {
-        String currentAudioFocus =  SrcMngSwitchProxy.getInstance().getCurrentAudioFocus();
-        Log.d(TAG, "releaseAudioFocus: 当前焦点  == "+currentAudioFocus);
-        if(!currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
-            Log.d(TAG, "releaseAudioFocus: 当前焦点不在蓝牙电话，不需要释放");
-            return;
-        }
+//        String currentAudioFocus =  SrcMngSwitchProxy.getInstance().getCurrentAudioFocus();
+//        Log.d(TAG, "releaseAudioFocus: 当前焦点  == "+currentAudioFocus);
+//        if(!currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
+//            Log.d(TAG, "releaseAudioFocus: 当前焦点不在蓝牙电话，不需要释放");
+//            return;
+//        }
         setParms(false,7);
         new Thread() {
             @Override
@@ -707,10 +734,10 @@ public class CallService extends Service {
         }
         String currentAudioFocus =  SrcMngSwitchProxy.getInstance().getCurrentAudioFocus();
         Log.d(TAG, "applyAudioFocus: 当前焦点  == "+currentAudioFocus);
-        if(currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
-            Log.d(TAG, "applyAudioFocus: 音频焦点已经获取,不需要再次获取");
-            return;
-        }
+//        if(currentAudioFocus.equals(AdayoSource.ADAYO_SOURCE_BT_PHONE)){
+//            Log.d(TAG, "applyAudioFocus: 音频焦点已经获取,不需要再次获取");
+//            return;
+//        }
 
         new Thread() {
             @Override

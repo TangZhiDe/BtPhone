@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.adayo.adayosource.AdayoSource;
 import com.adayo.app.utils.LogUtils;
 import com.adayo.proxy.settings.SettingExternalManager;
 import com.adayo.proxy.share.ShareDataManager;
@@ -14,7 +15,6 @@ import com.nforetek.bt.phone.service_boardcast.CallService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.nforetek.bt.phone.service_boardcast.CallService.backCarState;
 
 
 /**
@@ -40,14 +40,12 @@ public class ShareInfoUtils {
                 JSONObject jsonObject = new JSONObject(strCommonSettingJSON);
                 boolean backCarState = jsonObject.getBoolean("backCarState");
                 Log.d("loadSkinInfo", "backCarState = "+backCarState);
-                CallService.backCarState = backCarState;
+                MyApplication.backCarState = backCarState;
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public  static void parseSkinInfo(String s) {
@@ -56,17 +54,16 @@ public class ShareInfoUtils {
             if(jsonObject.has("backCarState")){
                 boolean backCarState = jsonObject.getBoolean("backCarState");
                 Log.d("parseSkinInfo", "backCarState = "+backCarState+"  context="+context);
-                CallService.backCarState = backCarState;
+                MyApplication.backCarState = backCarState;
                 if(context != null){
                     if(backCarState){
                         //在倒车 隐藏弹窗
-
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_HIDE);
+                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_HIDE);
 
                     }else {
                         CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
+                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_OUT);
                     }
                 }
 
@@ -88,10 +85,11 @@ public class ShareInfoUtils {
                     currentUID = UID;
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
                     if(UID.equals("ADAYO_SOURCE_BT_PHONE")){
-                        Log.d("parseSkinInfo", "parseSkinInfo1: ");
-                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_TURN_CALL);
+                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_TURN_CALL);
+                    }else if(UID.equals(AdayoSource.ADAYO_SOURCE_AVM) || UID.equals(AdayoSource.ADAYO_SOURCE_RVC)){
+                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_HIDE);
                     } else {
-                        management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_YUAN);
+                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_YUAN);
                     }
                 }
             }
@@ -110,7 +108,7 @@ public class ShareInfoUtils {
                 if(!call_state){
                     Log.i("parseSkinInfo", "parseSkinInfo2: ibCall结束显示通话界面");
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
-                    management.showCallInterface(context,CallInterfaceManagement.SHOW_TYPE_OUT);
+                    management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_OUT);
                 }
             }
 
