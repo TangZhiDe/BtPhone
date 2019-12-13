@@ -27,14 +27,13 @@ public class MyApplication extends Application {
     public static boolean iCall_state = false;//   i/bCall是否在通话中
     public static boolean answerSouce = true;//   是否响应切源
     public static boolean backCarState = false;//倒车状态 true-倒车  false-非倒车
-    public static String Verson = "_V3.3";
+    public static boolean sys_beep_switch = true;//按键提示音
+    public static String Verson = "_V4.1.1";
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate: ");
         mBPresenter = BtPresenter.getInstance(this);
-//        CallInterfaceManagement instance = CallInterfaceManagement.getCallInterfaceManagementInstance();
-//        instance.setParms(this,mBPresenter);
     }
 
     @Override

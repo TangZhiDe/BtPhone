@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.os.Handler;
@@ -39,6 +40,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.adayo.adayosource.AdayoSource;
 import com.adayo.app.base.BaseActivity;
@@ -77,7 +79,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         BtPresenter.UiBluetoothSettingChangeListerer, IBtContract {
 
 
-    private static final String TAG = BtPhoneMainActivity.class.getCanonicalName()+MyApplication.Verson;
+    private static final String TAG = BtPhoneMainActivity.class.getCanonicalName() + MyApplication.Verson;
     private BtPresenter mBPresenter;
     private ContactFragment contactFragment;
     private RecordsFragment recordsFragment;
@@ -113,6 +115,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     private RadioButton tab_records;
     private RadioButton tab_contact;
     private boolean isPageShow = false;//搜索匹配联系人页面是否显示
+
     /**
      * 获取该 Activity 布局控件 ID。
      */
@@ -186,9 +189,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         super.onStart();
         Log.d(TAG, "onStart: ");
         disableShowInput(phone_num);
-        if(MyApplication.mBPresenter != null ){
-            Log.d(TAG, "onStart:MyApplication.isPbapDownload= "+MyApplication.mBPresenter.getPbapDownLoadState());
-            if( MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CONTACT || MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CALLLOGS){
+        if (MyApplication.mBPresenter != null) {
+            Log.d(TAG, "onStart:MyApplication.isPbapDownload= " + MyApplication.mBPresenter.getPbapDownLoadState());
+            if (MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CONTACT || MyApplication.mBPresenter.getPbapDownLoadState() == NforeBtBaseJar.BT_SYNC_CALLLOGS) {
                 //正在下载联系人
                 Log.d(TAG, "onStart: 开始下载");
                 myHandler.sendEmptyMessage(0x02);
@@ -196,7 +199,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         }
         isopen();
     }
-
 
 
     //	private boolean isBTConnect = false;
@@ -292,7 +294,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                     }
 
                 } else {
-                    if(isPageShow){
+                    if (isPageShow) {
                         main_fit.setVisibility(View.GONE);
                         main_fit.setAnimation(BtUtils.makeOutAnimation(BtPhoneMainActivity.this, false));
                         phone_num.setCursorVisible(false);
@@ -312,7 +314,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         MyLinearLayoutManager myLinearLayoutManager = new MyLinearLayoutManager(getMContext(), LinearLayoutManager.VERTICAL, false);
         recycleview.setLayoutManager(myLinearLayoutManager);
         recycleview.addItemDecoration(new SpaceItemDecoration(10));
-        callRecyclerAdapter = new SortAdapter(this, callList,0);
+        callRecyclerAdapter = new SortAdapter(this, callList, 0);
         recycleview.setAdapter(callRecyclerAdapter);
         callRecyclerAdapter.setOnItemClickListener(new SortAdapter.OnItemClickListener() {
             @Override
@@ -393,14 +395,14 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                         if (TextUtils.isEmpty(name))
                             name = "名称未设置";
                         main_device_name.setText(name);
-                    }else {
+                    } else {
                         stopRotate();
-                        input_number ="";
+                        input_number = "";
                         phone_num.setText("");
                     }
                     break;
                 case 0x01:
-                    if(mBPresenter != null){
+                    if (mBPresenter != null) {
 //                        mBPresenter.getData();
                         if (mBPresenter.getContactFragment() != null) {
                             mBPresenter.getContactFragment().getList();
@@ -447,7 +449,6 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
         empty_loading.setVisibility(View.GONE);
         ico_loading.clearAnimation();
     }
-
 
 
     private static class SpaceItemDecoration extends RecyclerView.ItemDecoration {
@@ -564,13 +565,17 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         Log.d(TAG, "onCreate");
         btPhoneMainActivity = this;
-        if(MyApplication.mBPresenter != null){
+        if (MyApplication.mBPresenter != null) {
             MyApplication.mBPresenter.setBtPhoneMainActivity(this);
         }
         Intent service = new Intent();
         service.setAction("com.nforetek.bt.phone.callService");
         service.setPackage(getPackageName());
-        startService(service);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(service);
+        } else {
+            startService(service);
+        }
         main_tabs = findViewById(R.id.main_tabs);
         tab_records = findViewById(R.id.tab_records);
         tab_contact = findViewById(R.id.tab_contact);
@@ -629,7 +634,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(MyApplication.mBPresenter != null){
+        if (MyApplication.mBPresenter != null) {
             MyApplication.mBPresenter.setBtPhoneMainActivity(null);
         }
         unRegisterSourceOff();
@@ -706,18 +711,18 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 
             case R.id.keyboard_call:
                 try {
-                    if ( mBPresenter != null && mBPresenter.isHfpConnected()) {
-                        if(input_number.length() != 0){
+                    if (mBPresenter != null && mBPresenter.isHfpConnected()) {
+                        if (input_number.length() != 0) {
                             mBPresenter.reqHfpDialCall(input_number);
                             Log.d(TAG, "onClick: 进入通话界面1");
                             input_number = input_number.substring(0, 0);
                             phone_num.setText(input_number);
-                        }else {
-                            if(MyApplication.recordsList.size() >0){
+                        } else {
+                            if (MyApplication.recordsList.size() > 0) {
                                 String number = MyApplication.recordsList.get(0).getNumber();
                                 phone_num.setText(number);
                                 input_number = number;
-                            }else {
+                            } else {
                                 Log.d(TAG, "onClick: recordsList为空，没有同步通话记录");
                             }
                         }
@@ -734,7 +739,7 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
 //                    phone_num.setSelection(phone_num.length());
 //                }
                 StringBuffer sb = new StringBuffer(phone_num.getText().toString().trim());
-                if(sb.toString().length() == 0){
+                if (sb.toString().length() == 0) {
                     return;
                 }
                 int index = 0;
@@ -793,10 +798,10 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
                 SrcMngSwitchProxy srcMngSwitchProxy = SrcMngSwitchProxy.getInstance();
                 HashMap<String, String> map = new HashMap<>();
                 map.put("bt", "ConnectBt");
-                Bundle bundle =ActivityStartAnimHelper.addTransAnimParam(getContext(),R.anim.exit_anim,map);
+                Bundle bundle = ActivityStartAnimHelper.addTransAnimParam(getContext(), R.anim.exit_anim, map);
                 int value = AppConfigType.SourceSwitch.APP_ON.getValue();
-                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING,null,map,
-                        value,  UI_AUDIO.getValue(),bundle);
+                SourceInfo info = new SourceInfo(AdayoSource.ADAYO_SOURCE_SETTING, null, map,
+                        value, UI_AUDIO.getValue(), bundle);
                 srcMngSwitchProxy.onRequest(info);
                 Log.d(TAG, "onClick: 通过源管理跳转到setting蓝牙界面");
                 break;
@@ -816,7 +821,9 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             case R.id.number00:
                 onNumberClick("+");
                 //调用这个方法让长按事件发出声音
-                KeyEventManager.getKeyEventManager(this).playTouchTone();
+                if(MyApplication.sys_beep_switch){
+                    KeyEventManager.getKeyEventManager(this).playTouchTone();
+                }
                 break;
             case R.id.numberjinhao:
 //                onNumberClick(";");
@@ -979,11 +986,11 @@ public class BtPhoneMainActivity extends BaseActivity implements View.OnClickLis
             if (mBPresenter == null) {
 
             } else {
-                Log.d(TAG, "============!mCommand.isHfpConnected()========= "  + mBPresenter.isHfpConnected());
+                Log.d(TAG, "============!mCommand.isHfpConnected()========= " + mBPresenter.isHfpConnected());
                 if (!mBPresenter.isHfpConnected()) {
                     btConnect(false);
                     Log.d(TAG, "============!mCommand.isHfpConnected()================== ");
-                } else  {
+                } else {
                     Message message = myHandler.obtainMessage(0x00);
                     try {
                         String address = mBPresenter.getHfpConnectedAddress();

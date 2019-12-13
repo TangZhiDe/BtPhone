@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.phone.presenter.BtPresenter;
+import com.nforetek.bt.phone.service_boardcast.CallService;
 import com.nforetek.bt.phone.tools.BtUtils;
 import com.nforetek.bt.phone.tools.CallInterfaceManagement;
 import com.nforetek.bt.phone.tools.GetInfoFormContacts;
@@ -114,11 +115,20 @@ public class IncomingActivity extends Activity {
                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
                         calling_firName.setVisibility(View.VISIBLE);
                         calling_firName.setText(callName.substring(0));
+                        if (callName.equals(callNumber)) {
+                            incoming_name.setText("");
+                            calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
+                            calling_firName.setVisibility(View.GONE);
+                        }else {
+                            incoming_name.setText(callName);
+                        }
                     }else {
+                        incoming_name.setText("");
                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
                         calling_firName.setVisibility(View.GONE);
                     }
-                    incoming_name.setText(callName);
+
+
 //                if("".equals(callName1)){
 //                    callName1 = callNumber;
 //                }

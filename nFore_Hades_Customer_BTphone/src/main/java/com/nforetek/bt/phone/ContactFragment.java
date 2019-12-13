@@ -241,7 +241,6 @@ public class ContactFragment extends BaseFragment<BtPresenter> {
                     Log.d(TAG, "onClick: 刷新");
                     mBPresenter.refresh();
                 }
-
             }
         });
         getList();
@@ -277,7 +276,6 @@ public class ContactFragment extends BaseFragment<BtPresenter> {
                         adapter.setContactsList(MyApplication.contactList);
                         adapter.notifyDataSetChanged();
                     }
-
                     break;
                 case 0x01:
                     MyApplication.contactList.clear();

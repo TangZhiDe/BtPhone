@@ -5,7 +5,7 @@ android {
 
     defaultConfig {
         applicationId "com.nforetek.bt.phone"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 28
     }
 

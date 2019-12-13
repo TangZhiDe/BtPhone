@@ -32,6 +32,7 @@ public class ShareInfoUtils {
      */
     public static void loadSkinInfo() {
         String strCommonSettingJSON = mShareDataManager.getShareData(backCarStateID);
+        String strvoiceIDJSON = mShareDataManager.getShareData(voiceID);
         try {
             if (strCommonSettingJSON == null) {
                 Log.d("loadSkinInfo", "strCommonSettingJSON = null");
@@ -41,6 +42,15 @@ public class ShareInfoUtils {
                 boolean backCarState = jsonObject.getBoolean("backCarState");
                 Log.d("loadSkinInfo", "backCarState = "+backCarState);
                 MyApplication.backCarState = backCarState;
+            }
+            if (strvoiceIDJSON == null) {
+                Log.d("loadSkinInfo", "strvoiceIDJSON = null");
+                return;
+            } else {
+                JSONObject jsonObject = new JSONObject(strvoiceIDJSON);
+                boolean sys_beep_switch = jsonObject.getBoolean("sys_beep_switch");
+                Log.d("loadSkinInfo", "sys_beep_switch = "+sys_beep_switch);
+                MyApplication.sys_beep_switch = sys_beep_switch;
             }
 
         } catch (JSONException e) {
@@ -80,7 +90,7 @@ public class ShareInfoUtils {
             JSONObject jsonObject = new JSONObject(s);
             if(jsonObject.has("UID")){
                 String UID = jsonObject.getString("UID");
-                Log.d("parseSkinInfo", "UID = "+UID+"  context="+context);
+                Log.d("parseSkinInfo", "UID = "+UID+"   needTurnCallActivity ="+CallService.needTurnCallActivity+"  context="+context);
                 if(!TextUtils.isEmpty(UID) && !UID.equals(currentUID) && context != null && !MyApplication.iCall_state){
                     currentUID = UID;
                     CallInterfaceManagement management = CallInterfaceManagement.getCallInterfaceManagementInstance();
@@ -89,7 +99,9 @@ public class ShareInfoUtils {
                     }else if(UID.equals(AdayoSource.ADAYO_SOURCE_AVM) || UID.equals(AdayoSource.ADAYO_SOURCE_RVC)){
                         management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_HIDE);
                     } else {
-                        management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_YUAN);
+                        if(!CallService.needTurnCallActivity){
+                            management.showCallInterface(CallInterfaceManagement.SHOW_TYPE_YUAN);
+                        }
                     }
                 }
             }
@@ -125,6 +137,11 @@ public class ShareInfoUtils {
                 if(mute_switch){
 
                 }
+            }
+            if(jsonObject.has("sys_beep_switch")){
+                boolean sys_beep_switch = jsonObject.getBoolean("sys_beep_switch");
+                Log.d("parseSkinInfo", "sys_beep_switch = "+sys_beep_switch);
+                MyApplication.sys_beep_switch = sys_beep_switch;
             }
 
         }catch (JSONException e){
@@ -165,6 +182,7 @@ public class ShareInfoUtils {
             mShareDataManager.registerShareDataListener(backCarStateID,shareDataListener);
             mShareDataManager.registerShareDataListener(srcID,shareDataListener);
             mShareDataManager.registerShareDataListener(iCallID,shareDataListener);
+            mShareDataManager.registerShareDataListener(voiceID,shareDataListener);
         } else {
             Log.d("register","ShareDataManager is null");
         }
@@ -177,6 +195,7 @@ public class ShareInfoUtils {
             mShareDataManager.unregisterShareDataListener(backCarStateID,shareDataListener);
             mShareDataManager.unregisterShareDataListener(srcID,shareDataListener);
             mShareDataManager.unregisterShareDataListener(iCallID,shareDataListener);
+            mShareDataManager.unregisterShareDataListener(voiceID,shareDataListener);
             mShareDataManager = null;
         }else{
 //            Log.d("unregister","ShareDataManager is null");

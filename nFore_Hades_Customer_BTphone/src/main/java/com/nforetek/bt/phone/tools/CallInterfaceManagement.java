@@ -35,8 +35,7 @@ import static com.adayo.proxy.sourcemngproxy.Beans.AppConfigType.SourceType.UI_A
 
 public class CallInterfaceManagement {
 
-    private static String version = "1.1";
-    private static String TAG = CallInterfaceManagement.class.getCanonicalName()+version;
+    private static String TAG = CallInterfaceManagement.class.getCanonicalName()+MyApplication.Verson;
 
     public final static int SHOW_TYPE_IN = 0;//来电
     public final static int SHOW_TYPE_DIALOG = 1;//显示弹窗
@@ -65,103 +64,106 @@ public class CallInterfaceManagement {
     }
 
     public void showCallInterface(int type){
-        if(MyApplication.mBPresenter != null && this.btPresenter == null){
-            this.btPresenter = MyApplication.mBPresenter;
-        }
-        if(MyApplication.backCarState){
-            Log.d(TAG, "showCallInterface: 正在倒车，不显示通话界面");
-            WindowDialog.initInstance();
+        synchronized (CallInterfaceManagement.class) {
+            if(MyApplication.mBPresenter != null && this.btPresenter == null){
+                this.btPresenter = MyApplication.mBPresenter;
+            }
+            if(MyApplication.backCarState){
+                Log.d(TAG, "showCallInterface: 正在倒车，不显示通话界面");
+                WindowDialog.initInstance();
 //            setToBack(context);//当倒车时将通话界面隐藏
-            BtUtils.finish(CallingActivity.callingActivity);
-            BtUtils.finish(IncomingActivity.bTphoneCallActivity);
-            return;
-        }
-        Log.d(TAG, "showCallInterface:iCall_state= "+MyApplication.iCall_state);
-        if(MyApplication.iCall_state){
-            myHandler.sendEmptyMessage(1);
-        }else {
-            boolean isBtAtTop = getCurrentUid(context);
-            switch (type){
-                case SHOW_TYPE_IN:
-                    if(isBtAtTop){
-                        if(IncomingActivity.bTphoneCallActivity == null || IncomingActivity.bTphoneCallActivity.isFinishing()){
-                            Log.d(TAG, "showCallInterface: ----------------来电显示IncomingActivity-------------");
-                            Intent intent = new Intent();
-                            intent.setClass(context, IncomingActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(intent);
-                        }
+                BtUtils.finish(CallingActivity.callingActivity);
+                BtUtils.finish(IncomingActivity.bTphoneCallActivity);
+                return;
+            }
+            Log.d(TAG, "showCallInterface:iCall_state= "+MyApplication.iCall_state);
+            if(MyApplication.iCall_state){
+                myHandler.sendEmptyMessage(1);
+            }else {
+                boolean isBtAtTop = getCurrentUid(context);
+                switch (type){
+                    case SHOW_TYPE_IN:
+                        if(isBtAtTop){
+                            if(IncomingActivity.bTphoneCallActivity == null || IncomingActivity.bTphoneCallActivity.isFinishing()){
+                                Log.d(TAG, "showCallInterface: ----------------来电显示IncomingActivity-------------");
+                                Intent intent = new Intent();
+                                intent.setClass(context, IncomingActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(intent);
+                            }
 
 
-                    }else {
-                        catSource(true);
+                        }else {
+                            catSource(true);
 //                        Log.d(TAG, "showCallInterface: ----------------来电显示Window-------------");
 //                        myHandler.sendEmptyMessage(0);
-                    }
-                    break;
-                case SHOW_TYPE_OUT:
-                    if(isBtAtTop){
-                        List<NfHfpClientCall> hfpCallList = null;
-                        try {
-                            hfpCallList = btPresenter.getHfpCallList();
-                            if(hfpCallList != null && hfpCallList.size()>0){
-                                if (CallingActivity.callingActivity == null || CallingActivity.callingActivity.isFinishing()) {
-                                    Log.d(TAG, "------------显示Activity-----去电----------");
-                                    Intent intent = new Intent();
-                                    intent.setClass(context, CallingActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    context.startActivity(intent);
+                        }
+                        break;
+                    case SHOW_TYPE_OUT:
+                        if(isBtAtTop){
+                            List<NfHfpClientCall> hfpCallList = null;
+                            try {
+                                hfpCallList = btPresenter.getHfpCallList();
+                                if(hfpCallList != null && hfpCallList.size()>0){
+                                    if (CallingActivity.callingActivity == null || CallingActivity.callingActivity.isFinishing()) {
+                                        Log.d(TAG, "------------显示Activity-----去电----------");
+                                        Intent intent = new Intent();
+                                        intent.setClass(context, CallingActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        context.startActivity(intent);
+                                    }
+
                                 }
 
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
                             }
 
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
+                        }else {
+                            Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
+                            myHandler.sendEmptyMessage(0);
                         }
+                        break;
+                    case SHOW_TYPE_OUT_ONLY:
+                        if(isBtAtTop){
+                            List<NfHfpClientCall> hfpCallList = null;
+                            try {
+                                hfpCallList = btPresenter.getHfpCallList();
+                                if(hfpCallList != null && hfpCallList.size()>0){
+                                    if (CallingActivity.callingActivity == null || CallingActivity.callingActivity.isFinishing()) {
+                                        Log.d(TAG, "------------显示Activity-----去电----------");
+                                        Intent intent = new Intent();
+                                        intent.setClass(context, CallingActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        context.startActivity(intent);
+                                        CallService.needTurnCallActivity = false;
+                                    }
 
-                    }else {
-                        Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
-                        myHandler.sendEmptyMessage(0);
-                    }
-                    break;
-                case SHOW_TYPE_OUT_ONLY:
-                    if(isBtAtTop){
-                        List<NfHfpClientCall> hfpCallList = null;
-                        try {
-                            hfpCallList = btPresenter.getHfpCallList();
-                            if(hfpCallList != null && hfpCallList.size()>0){
-                                if (CallingActivity.callingActivity == null || CallingActivity.callingActivity.isFinishing()) {
-                                    Log.d(TAG, "------------显示Activity-----去电----------");
-                                    Intent intent = new Intent();
-                                    intent.setClass(context, CallingActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    context.startActivity(intent);
                                 }
 
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
                             }
 
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-
-                    }else {
-                        catSource(true);
+                        }else {
+                            catSource(true);
+                            CallService.needTurnCallActivity = false;
 //                        Log.d(TAG, "showCallInterface: ----------------去电显示Window-------------");
 //                        myHandler.sendEmptyMessage(0);
-                    }
-                    break;
-                case SHOW_TYPE_DIALOG:
+                        }
+                        break;
+                    case SHOW_TYPE_DIALOG:
 //                    ((Activity)context).moveTaskToBack(true);
-                    catSource(false);
-                    myHandler.sendEmptyMessageDelayed(2,500);
-                    break;
-                case SHOW_TYPE_YUAN:
-                    if(!getCurrentUid(context)){
-                        myHandler.sendEmptyMessage(0);
-                    }
-                    break;
-                case SHOW_TYPE_Activity:
-                    catSource(true);
+                        catSource(false);
+                        myHandler.sendEmptyMessageDelayed(2,500);
+                        break;
+                    case SHOW_TYPE_YUAN:
+                        if(!getCurrentUid(context)){
+                            myHandler.sendEmptyMessage(0);
+                        }
+                        break;
+                    case SHOW_TYPE_Activity:
+                        catSource(true);
 //                    WindowDialog.initInstance();
 //                    List<NfHfpClientCall> hfpCallList = null;
 //                    try {
@@ -178,37 +180,36 @@ public class CallInterfaceManagement {
 //                    } catch (RemoteException e) {
 //                        e.printStackTrace();
 //                    }
-                    break;
-                case SHOW_TYPE_TURN_CALL:
-                    WindowDialog.initInstance();
-                    List<NfHfpClientCall> hfpCallList = null;
-                    try {
-                        hfpCallList = btPresenter.getHfpCallList();
-                        if(hfpCallList != null && hfpCallList.size()>0){
-                            NfHfpClientCall call = hfpCallList.get(0);
-                            if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
-                                setTopApp(true,context);
-                            }else {
-                                setTopApp(false,context);
+                        break;
+                    case SHOW_TYPE_TURN_CALL:
+                        WindowDialog.initInstance();
+                        List<NfHfpClientCall> hfpCallList = null;
+                        try {
+                            hfpCallList = btPresenter.getHfpCallList();
+                            if(hfpCallList != null && hfpCallList.size()>0){
+                                NfHfpClientCall call = hfpCallList.get(0);
+                                if(call.getState() ==NfHfpClientCall.CALL_STATE_INCOMING){
+                                    setTopApp(true,context);
+                                }else {
+                                    setTopApp(false,context);
+                                }
                             }
+
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
+                        break;
 
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                    break;
+                    case SHOW_TYPE_HIDE:
+                        WindowDialog.initInstance();
+                        BtUtils.finish(CallingActivity.callingActivity);
+                        BtUtils.finish(IncomingActivity.bTphoneCallActivity);
 
-                case SHOW_TYPE_HIDE:
-                    WindowDialog.initInstance();
-                    BtUtils.finish(CallingActivity.callingActivity);
-                    BtUtils.finish(IncomingActivity.bTphoneCallActivity);
+                        break;
 
-                    break;
-
+                }
             }
         }
-
-
     }
 
 

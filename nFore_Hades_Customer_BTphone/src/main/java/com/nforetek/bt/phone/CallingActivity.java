@@ -273,11 +273,21 @@ public class CallingActivity extends Activity implements View.OnClickListener, V
                                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image));
                                         calling_firName.setVisibility(View.VISIBLE);
                                         calling_firName.setText(callName.substring(0));
+                                        if (callName.equals(number)) {
+                                            calling_name.setText("");
+                                            calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
+                                            calling_firName.setVisibility(View.GONE);
+                                        }else {
+                                            calling_name.setText(callName);
+                                        }
+
                                     }else {
+                                        calling_name.setText("");
                                         calling_img_bg.setImageDrawable(getResources().getDrawable(R.drawable.icon_contact_image_bg));
                                         calling_firName.setVisibility(View.GONE);
                                     }
-                                    calling_name.setText(callName);
+
+
                                     getCallState(call);
                                 }
                                 break;

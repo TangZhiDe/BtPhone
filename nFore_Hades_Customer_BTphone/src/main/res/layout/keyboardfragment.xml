@@ -193,6 +193,7 @@
                 android:id="@+id/keyboard_asterisk"
                 style="@style/Radio_button_three_style"
                 android:layout_centerVertical="true"
+                android:paddingTop="10px"
                 android:text="*" />
 
             <!--<TextView-->

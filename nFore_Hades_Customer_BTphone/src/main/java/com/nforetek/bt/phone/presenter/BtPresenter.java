@@ -6,6 +6,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSON;
 import com.nforetek.bt.aidl.NfHfpClientCall;
 import com.nforetek.bt.base.jar.NforeBtBaseJar;
 import com.nforetek.bt.base.listener.BluetoothMusicChangeListener;
@@ -1600,7 +1601,27 @@ public class BtPresenter implements
      **/
     public List<Contacts> getContactsListForDB() throws RemoteException {
         Log.v(TAG, "getContactsListForDB()");
-        return NforeBtBaseJar.getContactsListForDB();
+        List<Contacts> contactsListForDB = NforeBtBaseJar.getContactsListForDB();
+        if(contactsListForDB != null){
+            for (int i = 0; i < contactsListForDB.size(); i++) {
+                Contacts contacts = contactsListForDB.get(i);
+                String numberJSON = contacts.getNumberJSON();
+                List<String> numbers = JSON.parseArray(numberJSON, String.class);
+                if(numbers.size() > 1){
+                    for (int j = 0; j < numbers.size(); j++) {
+                        Contacts contacts1 = new Contacts();
+                        contacts1.setSzm(contacts.getSzm());
+                        contacts1.setName(contacts.getName());
+                        contacts1.setPinyin(contacts.getPinyin());
+                        contacts1.setNumberJSON("[\""+numbers.get(j)+"\"]");
+                        contactsListForDB.add(contacts1);
+                    }
+                    contactsListForDB.remove(i);
+                }
+
+            }
+        }
+        return contactsListForDB;
     }
 
     /** 储存ui传过来的通话记录到serviceDB，当蓝牙通话中时，调用此接口可储存单条通话记录到通话记录数据表，通话结束后，无需再进行下载通话记录，直接调用getCallLogsListForDB即可 **/
@@ -1649,8 +1670,11 @@ public class BtPresenter implements
      **/
     public String getCallName(String number) throws RemoteException {
         Log.v(TAG, "getCallName() " + number);
-        String name = "";
+        String name = null;
         name = NforeBtBaseJar.getCallName(number);
+        if(name == null){
+            name = "";
+        }
         return name;
     }
 

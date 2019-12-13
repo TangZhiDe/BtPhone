@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 public class BootBroadcastReceiver extends BroadcastReceiver {
@@ -15,7 +16,11 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
         Intent service = new Intent();
         service.setAction("com.nforetek.bt.phone.callService");
         service.setPackage(context.getPackageName());
-        context.startService(service);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(service);
+        } else {
+            context.startService(service);
+        }
         Log.v("TAG", "开机自动服务自动启动111.....");
     }
 }
